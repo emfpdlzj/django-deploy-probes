@@ -5,6 +5,7 @@ Production-ready HTTP deployment probe endpoints for Django applications. Unlike
 Use these endpoints for CI/CD, Docker, Kubernetes, and blue-green deployments.
 
 [![PyPI](https://img.shields.io/pypi/v/django-deploy-probes.svg?label=PyPI)](https://pypi.org/project/django-deploy-probes/)
+[![Django Packages](https://img.shields.io/badge/Django%20Packages-django--deploy--probes-0c4b33.svg)](https://djangopackages.org/packages/p/django-deploy-probes/)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.9-3776AB.svg)](https://www.python.org/)
 [![Django](https://img.shields.io/badge/django-%3E%3D4.2-0C4B33.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
