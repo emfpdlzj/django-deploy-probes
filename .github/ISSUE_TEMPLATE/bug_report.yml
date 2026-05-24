@@ -1,0 +1,45 @@
+name: Bug report
+description: Report a reproducible problem.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened?
+    validations:
+      required: true
+  - type: input
+    id: django-version
+    attributes:
+      label: Django version
+      placeholder: "5.2.1"
+    validations:
+      required: true
+  - type: input
+    id: python-version
+    attributes:
+      label: Python version
+      placeholder: "3.12.4"
+    validations:
+      required: true
+  - type: input
+    id: package-version
+    attributes:
+      label: django-deploy-probes version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+  - type: textarea
+    id: settings
+    attributes:
+      label: DEPLOY_PROBES settings
+      description: Remove secrets before submitting.
+      render: python
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true

@@ -1,0 +1,31 @@
+services:
+  web:
+    build:
+      context: ../..
+      dockerfile: examples/docker-compose/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_ENV: prod
+      APP_VERSION: 0.1.0
+      GIT_COMMIT: local
+      GIT_BRANCH: main
+      BUILD_TIME: "2026-05-17T00:00:00+09:00"
+      DEPLOY_SLOT: green
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8000/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-django-app
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: my-django-app
+  template:
+    metadata:
+      labels:
+        app: my-django-app
+    spec:
+      containers:
+        - name: web
+          image: registry.example.com/my-django-app:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DJANGO_ENV
+              value: prod
+            - name: APP_VERSION
+              value: 0.1.0
+            - name: GIT_COMMIT
+              value: a1b2c3d
+            - name: GIT_BRANCH
+              value: main
+            - name: BUILD_TIME
+              value: "2026-05-17T00:00:00+09:00"
+            - name: DEPLOY_SLOT
+              value: rolling
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /startupz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 12
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 2

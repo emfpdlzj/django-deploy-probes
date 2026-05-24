@@ -1,0 +1,119 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-deploy-probes"
+description = "Deployment probe endpoints for Django applications."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+dynamic = ["version"]
+authors = [
+    { name = "emfpdlzj", email = "redryan@ajou.ac.kr" },
+]
+maintainers = [
+    { name = "emfpdlzj", email = "redryan@ajou.ac.kr" },
+]
+keywords = [
+    "django",
+    "deployment",
+    "healthcheck",
+    "kubernetes",
+    "probe",
+    "readiness",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "django>=4.2",
+]
+
+[project.optional-dependencies]
+redis = [
+    "redis>=4.5",
+]
+celery = [
+    "celery>=5.3",
+]
+openapi = [
+    "djangorestframework>=3.14",
+    "drf-spectacular>=0.27",
+]
+all = [
+    "celery>=5.3",
+    "djangorestframework>=3.14",
+    "drf-spectacular>=0.27",
+    "redis>=4.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/emfpdlzj/django-deploy-probes"
+Repository = "https://github.com/emfpdlzj/django-deploy-probes"
+Issues = "https://github.com/emfpdlzj/django-deploy-probes/issues"
+Documentation = "https://github.com/emfpdlzj/django-deploy-probes#readme"
+Changelog = "https://github.com/emfpdlzj/django-deploy-probes/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=5.0",
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.hatch.build.targets.wheel]
+packages = ["django_deploy_probes"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/django_deploy_probes",
+    "/docs",
+    "/examples",
+    "/tests",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/CODE_OF_CONDUCT.md",
+    "/CONTRIBUTING.md",
+    "/LICENSE",
+    "/SECURITY.md",
+    "/SUPPORT.md",
+    "/pyproject.toml",
+]
+
+[tool.hatch.version]
+path = "django_deploy_probes/__init__.py"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[tool.coverage.run]
+branch = true
+source = ["django_deploy_probes"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
