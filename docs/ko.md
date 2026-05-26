@@ -1,6 +1,6 @@
 # django-deploy-probes
 
-이 문서는 [README.md](../README.md)의 한국어 번역본입니다.
+이 문서는 [문서 홈](index.md)의 한국어 번역본입니다.
 
 Django deployment probe endpoint를 제공합니다.
 
@@ -78,4 +78,4 @@ python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 
 GitHub Release를 발행하면 `.github/workflows/publish.yml`이 PyPI Trusted Publishing으로 배포합니다.
 
-[영어 README로 돌아가기](../README.md)
+[영어 문서 홈으로 돌아가기](index.md)

@@ -1,0 +1,54 @@
+site_name: django-deploy-probes
+site_description: Production-ready HTTP deployment probe endpoints for Django applications.
+site_url: https://emfpdlzj.github.io/django-deploy-probes/
+repo_url: https://github.com/emfpdlzj/django-deploy-probes
+repo_name: emfpdlzj/django-deploy-probes
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+    - content.action.edit
+    - content.code.copy
+    - search.highlight
+    - search.suggest
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Quick Start:
+      - Tutorial Index: tutorial.md
+      - Basic Setup: basic.md
+  - Reference:
+      - Endpoint Reference: api.md
+      - Configuration and Security: security.md
+      - OpenAPI: openapi.md
+      - Comparison with django-probes: comparison.md
+  - Deployment Guides:
+      - Docker: docker.md
+      - Docker Compose: docker-compose.md
+      - Kubernetes: kubernetes.md
+  - Recipes:
+      - GitHub Actions: recipes/github-actions.md
+      - Nginx Blue-Green: recipes/nginx-blue-green.md
+      - AWS ECS and ALB: recipes/aws-ecs-alb.md
+  - Translations:
+      - Korean: ko.md
+      - Japanese: ja.md
+      - Chinese Simplified: zh-CN.md

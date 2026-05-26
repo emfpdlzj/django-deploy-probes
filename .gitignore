@@ -4,11 +4,13 @@ __pycache__/
 *.py[cod]
 .coverage
 .DS_Store
+AGENTS.md
 .idea/
 .mypy_cache/
 .ruff_cache/
 build/
 dist/
 htmlcov/
+site/
 *.egg-info/
 .agents/*
