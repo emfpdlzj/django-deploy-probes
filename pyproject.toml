@@ -69,11 +69,13 @@ all = [
 Homepage = "https://github.com/emfpdlzj/django-deploy-probes"
 Repository = "https://github.com/emfpdlzj/django-deploy-probes"
 Issues = "https://github.com/emfpdlzj/django-deploy-probes/issues"
-Documentation = "https://github.com/emfpdlzj/django-deploy-probes#readme"
+Documentation = "https://emfpdlzj.github.io/django-deploy-probes/"
 Changelog = "https://github.com/emfpdlzj/django-deploy-probes/blob/main/CHANGELOG.md"
 
 [dependency-groups]
 dev = [
+    "mkdocs>=1.6,<2.0; python_version >= '3.10'",
+    "mkdocs-material>=9.6; python_version >= '3.10'",
     "pytest-cov>=5.0",
     "pytest>=8.0",
     "ruff>=0.6",
@@ -92,6 +94,7 @@ include = [
     "/docs",
     "/examples",
     "/tests",
+    "/mkdocs.yml",
     "/README.md",
     "/CHANGELOG.md",
     "/CODE_OF_CONDUCT.md",

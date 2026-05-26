@@ -1,6 +1,6 @@
 # django-deploy-probes
 
-本文档是 [README.md](../README.md) 的简体中文翻译。
+本文档是 [文档首页](index.md) 的简体中文翻译。
 
 为 Django 提供 deployment probe endpoints。
 
@@ -78,4 +78,4 @@ python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 
 发布 GitHub Release 后，`.github/workflows/publish.yml` 会通过 PyPI Trusted Publishing 发布。
 
-[返回英文 README](../README.md)
+[返回英文文档首页](index.md)

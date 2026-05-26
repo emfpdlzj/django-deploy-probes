@@ -1,6 +1,6 @@
 # django-deploy-probes
 
-このドキュメントは [README.md](../README.md) の日本語訳です。
+このドキュメントは [ドキュメントホーム](index.md) の日本語訳です。
 
 Django deployment probe endpoint を提供します。
 
@@ -78,4 +78,4 @@ python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 
 GitHub Release を公開すると、`.github/workflows/publish.yml` が PyPI Trusted Publishing で公開します。
 
-[英語 README に戻る](../README.md)
+[英語ドキュメントホームに戻る](index.md)
