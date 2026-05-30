@@ -46,7 +46,7 @@ urlpatterns = [
 
 `/readyz`의 사용자 정의 check 메시지는 기본적으로 숨겨집니다. `EXPOSE_CHECK_MESSAGES=True`를 사용하는 경우 메시지에 secret이나 민감한 값을 포함하지 마세요.
 
-Security check는 기본적으로 `REMOTE_ADDR`을 사용하며 `X-Forwarded-For`를 신뢰하지 않습니다. Proxy를 통해 probe에 접근하는 경우 reverse proxy 설정은 별도로 구성하세요.
+Security check는 기본적으로 `REMOTE_ADDR`을 사용합니다. Trusted reverse proxy 뒤에서 probe에 접근하는 경우 `TRUSTED_PROXY_NETWORKS`와 `CLIENT_IP_HEADER`를 설정해 원래 client IP를 안전하게 판별하세요.
 
 ## 빌드 및 배포
 

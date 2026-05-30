@@ -30,3 +30,5 @@ class DeployProbesSettingsTestCase(SimpleTestCase):
         self.assertEqual(probes_settings["DETAIL_LEVEL"], "none")
         self.assertIs(probes_settings["EXPOSE_CHECK_MESSAGES"], False)
         self.assertIn("127.0.0.1/32", probes_settings["INTERNAL_IP_NETWORKS"])
+        self.assertEqual(probes_settings["TRUSTED_PROXY_NETWORKS"], [])
+        self.assertIsNone(probes_settings["CLIENT_IP_HEADER"])

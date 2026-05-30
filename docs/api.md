@@ -86,6 +86,13 @@ DEPLOY_PROBES = {
     "EXPOSE_VERSION": True,
     "EXPOSE_BUILD_INFO": False,
     "INTERNAL_IP_ONLY": False,
+    "INTERNAL_IP_NETWORKS": [
+        "127.0.0.1/32",
+        "::1/128",
+        "10.0.0.0/8",
+    ],
+    "TRUSTED_PROXY_NETWORKS": [],
+    "CLIENT_IP_HEADER": None,
     "HEADER_TOKEN_VALIDATION": False,
     "ENABLE_OPENAPI": False,
 }
@@ -136,3 +143,8 @@ python manage.py check
 startup behavior stay independent.
 
 Validation catches common mistakes such as unknown check names, invalid custom check lists, invalid CIDR ranges, missing Redis locations, invalid `DETAIL_LEVEL`, and missing probe tokens.
+
+When probes are accessed through a trusted reverse proxy, set `TRUSTED_PROXY_NETWORKS` and
+`CLIENT_IP_HEADER` so `INTERNAL_IP_ONLY` can evaluate the original client IP instead of the
+proxy hop. `X-Forwarded-For` is resolved by walking the proxy chain from right to left and
+selecting the last untrusted address as the client IP.

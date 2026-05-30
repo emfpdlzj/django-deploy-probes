@@ -37,6 +37,91 @@ class SecurityTestCase(SimpleTestCase):
 
     @override_settings(
         DEPLOY_PROBES={
+            "INTERNAL_IP_ONLY": True,
+            "INTERNAL_IP_NETWORKS": ["10.0.0.0/8"],
+            "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24"],
+            "CLIENT_IP_HEADER": "X-Forwarded-For",
+        }
+    )
+    def test_internal_client_is_allowed_through_trusted_proxy(self):
+        response = self.client.get(
+            reverse("django_deploy_probes:version"),
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_FORWARDED_FOR="10.1.2.3",
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "INTERNAL_IP_ONLY": True,
+            "INTERNAL_IP_NETWORKS": ["10.0.0.0/8"],
+            "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24"],
+            "CLIENT_IP_HEADER": "X-Forwarded-For",
+        }
+    )
+    def test_external_client_is_blocked_through_trusted_proxy(self):
+        response = self.client.get(
+            reverse("django_deploy_probes:version"),
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_FORWARDED_FOR="198.51.100.7",
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "INTERNAL_IP_ONLY": True,
+            "INTERNAL_IP_NETWORKS": ["10.0.0.0/8"],
+            "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24"],
+            "CLIENT_IP_HEADER": "X-Forwarded-For",
+        }
+    )
+    def test_spoofed_forwarded_header_is_ignored_for_untrusted_proxy(self):
+        response = self.client.get(
+            reverse("django_deploy_probes:version"),
+            REMOTE_ADDR="198.51.100.9",
+            HTTP_X_FORWARDED_FOR="10.1.2.3",
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "INTERNAL_IP_ONLY": True,
+            "INTERNAL_IP_NETWORKS": ["10.0.0.0/8"],
+            "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24", "10.0.0.0/8"],
+            "CLIENT_IP_HEADER": "X-Forwarded-For",
+        }
+    )
+    def test_x_forwarded_for_uses_last_untrusted_hop_as_client_ip(self):
+        response = self.client.get(
+            reverse("django_deploy_probes:version"),
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_FORWARDED_FOR="198.51.100.7, 10.9.9.9",
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "INTERNAL_IP_ONLY": True,
+            "INTERNAL_IP_NETWORKS": ["10.0.0.0/8"],
+            "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24"],
+            "CLIENT_IP_HEADER": "X-Real-IP",
+        }
+    )
+    def test_custom_client_ip_header_is_supported_for_trusted_proxy(self):
+        response = self.client.get(
+            reverse("django_deploy_probes:version"),
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_REAL_IP="10.1.2.3",
+        )
+
+        self.assertEqual(response.status_code, 200)
+
+    @override_settings(
+        DEPLOY_PROBES={
             "HEADER_TOKEN_VALIDATION": {
                 "HEADER_NAME": "X-Probe-Token",
                 "TOKEN": "secret-token",

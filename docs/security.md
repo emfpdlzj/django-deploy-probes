@@ -139,10 +139,43 @@ If every endpoint returns `403`, check whether healthz protection is enabled:
 "PROTECT_HEALTHZ": False
 ```
 
-If proxy traffic is blocked, check the direct client IP seen by Django. This package uses `REMOTE_ADDR` for internal IP checks and does not trust `X-Forwarded-For`.
+If proxy traffic is blocked, check whether Django is seeing the proxy hop in `REMOTE_ADDR`. When
+probes are behind a trusted reverse proxy, configure `TRUSTED_PROXY_NETWORKS` and
+`CLIENT_IP_HEADER` so internal IP checks can evaluate the original client IP safely.
 
 If your probe traffic comes from a load balancer or private service network, add that CIDR to
 `INTERNAL_IP_NETWORKS`.
+
+## Trusted Reverse Proxy
+
+When probes are served behind ALB, Nginx, or an ingress controller, `REMOTE_ADDR` may be the
+proxy hop instead of the original client. In that case, configure a narrow trusted proxy CIDR
+list and the header that carries the client IP.
+
+```python
+DEPLOY_PROBES = {
+    "INTERNAL_IP_ONLY": True,
+    "INTERNAL_IP_NETWORKS": [
+        "10.0.0.0/8",
+        "192.168.0.0/16",
+    ],
+    "TRUSTED_PROXY_NETWORKS": [
+        "192.0.2.10/32",
+        "192.0.2.11/32",
+    ],
+    "CLIENT_IP_HEADER": "X-Forwarded-For",
+}
+```
+
+Rules:
+
+- If `REMOTE_ADDR` is not in `TRUSTED_PROXY_NETWORKS`, forwarded headers are ignored.
+- If `CLIENT_IP_HEADER` is `X-Forwarded-For`, the package walks the proxy chain from right to
+  left and treats the last untrusted hop as the client IP.
+- Keep `TRUSTED_PROXY_NETWORKS` as narrow as possible. Do not trust an entire private range
+  unless every host in that range is an authorized proxy.
+- If your proxy uses a single-value header such as `X-Real-IP`, set `CLIENT_IP_HEADER` to that
+  header name instead.
 
 ## Next Step
 

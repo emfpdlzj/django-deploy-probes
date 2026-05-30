@@ -46,7 +46,7 @@ urlpatterns = [
 
 `/readyz` のカスタム check メッセージはデフォルトで非表示です。`EXPOSE_CHECK_MESSAGES=True` を使う場合は、secret や機密情報をメッセージに含めないでください。
 
-Security check はデフォルトで `REMOTE_ADDR` を使用し、`X-Forwarded-For` は信頼しません。Proxy 経由で probe にアクセスする場合は、reverse proxy を別途設定してください。
+Security check はデフォルトで `REMOTE_ADDR` を使用します。Trusted reverse proxy の背後で probe にアクセスする場合は、`TRUSTED_PROXY_NETWORKS` と `CLIENT_IP_HEADER` を設定して元の client IP を安全に判定してください。
 
 ## ビルドと公開
 

@@ -42,6 +42,8 @@ DEFAULT_DEPLOY_PROBES = {
         "172.16.0.0/12",
         "192.168.0.0/16",
     ],
+    "TRUSTED_PROXY_NETWORKS": [],
+    "CLIENT_IP_HEADER": None,
     "HEADER_TOKEN_VALIDATION": False,
     "ENABLE_OPENAPI": False,
     "OPENAPI_TAG": "Deployment Probes",
