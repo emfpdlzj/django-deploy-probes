@@ -32,6 +32,8 @@ def check_deploy_probes_settings(app_configs, **kwargs):
     messages.extend(_check_custom_check_list("STARTUP_CUSTOM_CHECKS", merged))
     messages.extend(_check_detail_level(merged))
     messages.extend(_check_internal_networks(merged))
+    messages.extend(_check_trusted_proxy_networks(merged))
+    messages.extend(_check_client_ip_header(merged))
     messages.extend(_check_header_token(merged))
     messages.extend(_check_redis_config(merged))
     messages.extend(_check_require_checks(merged))
@@ -95,18 +97,66 @@ def _check_detail_level(probes_settings):
 
 
 def _check_internal_networks(probes_settings):
+    return _check_network_list(
+        key="INTERNAL_IP_NETWORKS",
+        value=probes_settings.get("INTERNAL_IP_NETWORKS", []),
+        error_id="django_deploy_probes.E005",
+    )
+
+
+def _check_trusted_proxy_networks(probes_settings):
+    return _check_network_list(
+        key="TRUSTED_PROXY_NETWORKS",
+        value=probes_settings.get("TRUSTED_PROXY_NETWORKS", []),
+        error_id="django_deploy_probes.E011",
+    )
+
+
+def _check_network_list(key, value, error_id):
+    if not isinstance(value, (list, tuple)):
+        return [
+            Error(
+                f"DEPLOY_PROBES['{key}'] must be a list or tuple.",
+                id=error_id,
+            )
+        ]
+
     messages = []
-    for network in probes_settings.get("INTERNAL_IP_NETWORKS", []):
+    for network in value:
         try:
             ip_network(network)
         except ValueError:
             messages.append(
                 Error(
-                    f"Invalid internal IP network: {network}.",
-                    id="django_deploy_probes.E005",
+                    f"Invalid {key} entry: {network}.",
+                    id=error_id,
                 )
             )
     return messages
+
+
+def _check_client_ip_header(probes_settings):
+    client_ip_header = probes_settings.get("CLIENT_IP_HEADER")
+    if client_ip_header in (None, False, ""):
+        return []
+
+    if not isinstance(client_ip_header, str):
+        return [
+            Error(
+                "DEPLOY_PROBES['CLIENT_IP_HEADER'] must be a string or None.",
+                id="django_deploy_probes.E012",
+            )
+        ]
+
+    if not probes_settings.get("TRUSTED_PROXY_NETWORKS"):
+        return [
+            Warning(
+                "CLIENT_IP_HEADER is configured without TRUSTED_PROXY_NETWORKS and will be ignored.",
+                id="django_deploy_probes.W004",
+            )
+        ]
+
+    return []
 
 
 def _check_header_token(probes_settings):

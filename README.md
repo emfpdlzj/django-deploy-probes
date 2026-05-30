@@ -61,6 +61,52 @@ curl -f http://localhost:8000/readyz
 curl -f http://localhost:8000/version
 ```
 
+Custom check messages are hidden by default. If you enable `EXPOSE_CHECK_MESSAGES=True`, do not include secrets or sensitive values in those messages.
+
+Security checks use `REMOTE_ADDR` by default. If probes are accessed through a trusted reverse proxy, configure `TRUSTED_PROXY_NETWORKS` and `CLIENT_IP_HEADER` to resolve the original client IP safely.
+
+### Common settings
+
+```python
+DEPLOY_PROBES = {
+    "SERVICE_NAME": "my-django-app",
+    "ENVIRONMENT": "prod",
+    "VERSION": "1.2.0",
+    "READY_CHECKS": ["database", "redis", "celery"],
+    "STARTUP_CHECKS": ["migrations"],
+    "READY_CUSTOM_CHECKS": [],
+    "STARTUP_CUSTOM_CHECKS": [],
+    "DATABASES": ["default"],
+    "REDIS": {
+        "default": {
+            "LOCATION": "redis://localhost:6379/0",
+            "TIMEOUT": 1.0,
+        },
+    },
+    "CELERY": {
+        "BROKER": True,
+        "WORKERS": False,
+        "RESULT_BACKEND": False,
+        "TIMEOUT": 1.0,
+    },
+    "DETAIL_LEVEL": "none",
+    "INCLUDE_CHECK_DURATIONS": False,
+    "REQUIRE_READY_CHECKS": False,
+    "REQUIRE_STARTUP_CHECKS": False,
+    "EXPOSE_CHECK_MESSAGES": False,
+    "INTERNAL_IP_ONLY": False,
+    "INTERNAL_IP_NETWORKS": [
+        "127.0.0.1/32",
+        "::1/128",
+        "10.0.0.0/8",
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+    ],
+    "TRUSTED_PROXY_NETWORKS": [],
+    "CLIENT_IP_HEADER": None,
+}
+```
+
 ## Development
 
 ```bash

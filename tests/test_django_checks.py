@@ -21,6 +21,24 @@ class DjangoChecksTestCase(SimpleTestCase):
 
         self.assertIn("django_deploy_probes.E005", {message.id for message in messages})
 
+    @override_settings(DEPLOY_PROBES={"TRUSTED_PROXY_NETWORKS": ["not-a-cidr"]})
+    def test_invalid_trusted_proxy_network_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E011", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"CLIENT_IP_HEADER": ["X-Forwarded-For"]})
+    def test_invalid_client_ip_header_type_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E012", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"CLIENT_IP_HEADER": "X-Forwarded-For"})
+    def test_client_ip_header_without_trusted_proxies_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.W004", {message.id for message in messages})
+
     @override_settings(
         DEPLOY_PROBES={
             "HEADER_TOKEN_VALIDATION": {

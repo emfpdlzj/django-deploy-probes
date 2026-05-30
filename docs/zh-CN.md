@@ -46,7 +46,7 @@ urlpatterns = [
 
 `/readyz` 的自定义 check 消息默认隐藏。使用 `EXPOSE_CHECK_MESSAGES=True` 时，请不要在消息中包含 secrets 或敏感值。
 
-Security checks 默认使用 `REMOTE_ADDR`，并且不信任 `X-Forwarded-For`。如果通过 proxy 访问 probes，请单独配置 reverse proxy。
+Security checks 默认使用 `REMOTE_ADDR`。如果 probes 位于 trusted reverse proxy 后面，请配置 `TRUSTED_PROXY_NETWORKS` 和 `CLIENT_IP_HEADER`，以安全地识别原始 client IP。
 
 ## 构建与发布
 
