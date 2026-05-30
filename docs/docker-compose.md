@@ -53,7 +53,7 @@ services:
       - "8000:8000"
     environment:
       DJANGO_ENV: prod
-      APP_VERSION: 0.1.0
+      APP_VERSION: 0.2.0
       GIT_COMMIT: local
       GIT_BRANCH: main
       BUILD_TIME: "2026-05-17T00:00:00+09:00"
@@ -202,4 +202,3 @@ curl -fsS http://127.0.0.1:8000/readyz
 ## Next Step
 
 Use [Kubernetes probes](kubernetes.md) for rolling deployments.
-

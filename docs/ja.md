@@ -60,8 +60,8 @@ uv build
 
 生成されるファイル:
 
-- `dist/django_deploy_probes-0.1.0.tar.gz`
-- `dist/django_deploy_probes-0.1.0-py3-none-any.whl`
+- `dist/django_deploy_probes-0.2.0.tar.gz`
+- `dist/django_deploy_probes-0.2.0-py3-none-any.whl`
 
 ### インストールテスト
 
@@ -70,7 +70,7 @@ uv build
 ```bash
 python -m venv /tmp/django-deploy-probes-install-test
 source /tmp/django-deploy-probes-install-test/bin/activate
-pip install dist/django_deploy_probes-0.1.0-py3-none-any.whl
+pip install dist/django_deploy_probes-0.2.0-py3-none-any.whl
 python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 ```
 

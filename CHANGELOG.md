@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.2.0 - Proxy-Aware Probe Security
+
+This release improves probe security for deployments behind trusted reverse proxies such as ALB,
+Nginx, and Kubernetes ingress.
+
+### Highlights
+
+- Add `TRUSTED_PROXY_NETWORKS` for explicitly trusted proxy CIDRs.
+- Add `CLIENT_IP_HEADER` for resolving the original client IP from trusted proxy headers.
+- Keep `REMOTE_ADDR` as the safe default when trusted proxy settings are not configured.
+- Ignore forwarded IP headers unless the request comes from a trusted proxy network.
+- Add Django system checks for proxy CIDR and client IP header validation.
+- Expand tests and documentation for reverse proxy probe deployments.
+
 ## v0.1.0 - Initial Release
 
 `django-deploy-probes` provides lightweight deployment probe endpoints for Django applications.
