@@ -68,7 +68,7 @@ DATABASES = {
 DEPLOY_PROBES = {
     "SERVICE_NAME": "secure-django-app",
     "ENVIRONMENT": os.getenv("DJANGO_ENV", "local"),
-    "VERSION": os.getenv("APP_VERSION", "0.1.0"),
+    "VERSION": os.getenv("APP_VERSION", "0.2.0"),
     "COMMIT": os.getenv("GIT_COMMIT", "local"),
     "BRANCH": os.getenv("GIT_BRANCH", "main"),
     "BUILD_TIME": os.getenv("BUILD_TIME", "2026-05-17T00:00:00+09:00"),

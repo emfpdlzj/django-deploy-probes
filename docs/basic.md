@@ -74,7 +74,7 @@ DATABASES = {
 DEPLOY_PROBES = {
     "SERVICE_NAME": "my-django-app",
     "ENVIRONMENT": "local",
-    "VERSION": "0.1.0",
+    "VERSION": "0.2.0",
     "COMMIT": "local",
     "BRANCH": "main",
     "BUILD_TIME": "2026-05-17T00:00:00+09:00",
@@ -121,7 +121,7 @@ Expected output:
 ```
 
 ```json
-{"service":"my-django-app","environment":"local","version":"0.1.0","commit":"local","branch":"main","build_time":"2026-05-17T00:00:00+09:00","slot":"local"}
+{"service":"my-django-app","environment":"local","version":"0.2.0","commit":"local","branch":"main","build_time":"2026-05-17T00:00:00+09:00","slot":"local"}
 ```
 
 ## Failure Checks

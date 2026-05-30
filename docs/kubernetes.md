@@ -19,8 +19,8 @@ kubernetes/
 ## Install
 
 ```bash
-docker build -t registry.example.com/my-django-app:0.1.0 .
-docker push registry.example.com/my-django-app:0.1.0
+docker build -t registry.example.com/my-django-app:0.2.0 .
+docker push registry.example.com/my-django-app:0.2.0
 ```
 
 ## Full Code
@@ -49,7 +49,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: registry.example.com/my-django-app:0.1.0
+          image: registry.example.com/my-django-app:0.2.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -57,7 +57,7 @@ spec:
             - name: DJANGO_ENV
               value: prod
             - name: APP_VERSION
-              value: 0.1.0
+              value: 0.2.0
             - name: GIT_COMMIT
               value: a1b2c3d
             - name: GIT_BRANCH
