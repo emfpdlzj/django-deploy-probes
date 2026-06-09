@@ -227,9 +227,9 @@ def _check_require_checks(probes_settings):
 
 
 def _check_storage_config(probes_settings):
-    if "storage" not in probes_settings.get("READY_CHECKS", []) and "storage" not in probes_settings.get(
-        "STARTUP_CHECKS", []
-    ):
+    if "storage" not in probes_settings.get(
+        "READY_CHECKS", []
+    ) and "storage" not in probes_settings.get("STARTUP_CHECKS", []):
         return []
 
     storage_settings = probes_settings.get("STORAGE")

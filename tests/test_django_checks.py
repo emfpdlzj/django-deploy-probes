@@ -88,7 +88,9 @@ class DjangoChecksTestCase(SimpleTestCase):
     @override_settings(
         DEPLOY_PROBES={
             "READY_CHECKS": ["storage"],
-            "STORAGE": {"default": {"CHECK": "exists", "PATH": "probe.txt", "ALLOW_MISSING": "yes"}},
+            "STORAGE": {
+                "default": {"CHECK": "exists", "PATH": "probe.txt", "ALLOW_MISSING": "yes"}
+            },
         }
     )
     def test_invalid_storage_allow_missing_type_is_reported(self):
