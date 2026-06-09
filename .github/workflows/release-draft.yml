@@ -1,0 +1,69 @@
+name: Release Draft
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "django_deploy_probes/__init__.py"
+      - ".github/workflows/release-draft.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    name: Create draft release from package version
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read package version
+        id: version
+        run: |
+          VERSION=$(python - <<'PY'
+          from pathlib import Path
+          import re
+
+          content = Path("django_deploy_probes/__init__.py").read_text()
+          match = re.search(r'__version__ = "([^"]+)"', content)
+          if not match:
+              raise SystemExit("Could not find __version__ in django_deploy_probes/__init__.py")
+          print(match.group(1))
+          PY
+          )
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing release
+        id: existing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create draft release
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --target "${{ github.sha }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --draft \
+            --generate-notes
+
+      - name: Summarize release status
+        run: |
+          if [ "${{ steps.existing.outputs.exists }}" = "true" ]; then
+            echo "Draft or published release already exists for ${{ steps.version.outputs.tag }}."
+          else
+            echo "Created draft release for ${{ steps.version.outputs.tag }}."
+          fi

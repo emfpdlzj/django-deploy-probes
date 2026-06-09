@@ -23,4 +23,5 @@ uv build
 1. Update the version in `django_deploy_probes/__init__.py`.
 2. Update `CHANGELOG.md`.
 3. Run tests, lint, and build locally.
-4. Create a GitHub release. The publish workflow uses PyPI Trusted Publishing.
+4. Merge the version bump PR into `main`. This creates a draft GitHub release and tag automatically.
+5. Review and publish the draft GitHub release. The publish workflow uses PyPI Trusted Publishing.
