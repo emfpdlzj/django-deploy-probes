@@ -14,6 +14,7 @@ class DeployProbesSettingsTestCase(SimpleTestCase):
         self.assertEqual(probes_settings["READY_CHECKS"], [])
         self.assertEqual(probes_settings["READY_CUSTOM_CHECKS"], [])
         self.assertEqual(probes_settings["STARTUP_CUSTOM_CHECKS"], [])
+        self.assertEqual(probes_settings["STORAGE"], {})
 
     @override_settings(DEPLOY_PROBES={"CELERY": {"BROKER": True}})
     def test_settings_loader_merges_nested_configured_values_with_defaults(self):

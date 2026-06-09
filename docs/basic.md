@@ -84,6 +84,21 @@ DEPLOY_PROBES = {
 }
 ```
 
+If your deployment depends on object storage before serving traffic, add a storage readiness check:
+
+```python
+DEPLOY_PROBES = {
+    "READY_CHECKS": ["database", "storage"],
+    "DATABASES": ["default"],
+    "STORAGE": {
+        "default": {
+            "CHECK": "exists",
+            "PATH": "probes/ready.txt",
+        },
+    },
+}
+```
+
 `config/urls.py`
 
 ```python

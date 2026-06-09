@@ -66,6 +66,7 @@ DEPLOY_PROBES = {
     "READY_CHECKS": [],
     "STARTUP_CHECKS": [],
     "DATABASES": ["default"],
+    "STORAGE": {},
     "REDIS": {},
     "CELERY": {
         "BROKER": False,
@@ -129,6 +130,35 @@ With `INCLUDE_CHECK_DURATIONS=True`, every check is wrapped with `status` and `d
   }
 }
 ```
+
+## Storage Checks
+
+The builtin `storage` check uses Django storage aliases from `STORAGES`. That means the same probe works for local filesystem storage, S3 backends, and custom storage implementations that honor Django's storage API.
+
+Example configuration:
+
+```python
+DEPLOY_PROBES = {
+    "READY_CHECKS": ["storage"],
+    "STORAGE": {
+        "default": {
+            "CHECK": "exists",
+            "PATH": "probes/ready.txt",
+        },
+        "s3_media": {
+            "CHECK": "write",
+            "PREFIX": "deploy-probes",
+        },
+    },
+}
+```
+
+Available modes:
+
+- `exists`: calls `storage.exists(PATH)` and fails when the object is missing.
+- `write`: creates and deletes a temporary probe object under `PREFIX`.
+
+If you only want to confirm that the backend responds without requiring a sentinel object, set `ALLOW_MISSING=True` on an `exists` check.
 
 ## Setting Validation
 

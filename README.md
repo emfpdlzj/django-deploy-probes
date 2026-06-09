@@ -65,6 +65,8 @@ Custom check messages are hidden by default. If you enable `EXPOSE_CHECK_MESSAGE
 
 Security checks use `REMOTE_ADDR` by default. If probes are accessed through a trusted reverse proxy, configure `TRUSTED_PROXY_NETWORKS` and `CLIENT_IP_HEADER` to resolve the original client IP safely.
 
+Storage checks use Django storage aliases, so the same probe can validate local filesystems, S3-compatible backends, and any custom storage backend wired through `STORAGES`.
+
 ### Common settings
 
 ```python
@@ -72,11 +74,21 @@ DEPLOY_PROBES = {
     "SERVICE_NAME": "my-django-app",
     "ENVIRONMENT": "prod",
     "VERSION": "1.2.0",
-    "READY_CHECKS": ["database", "redis", "celery"],
+    "READY_CHECKS": ["database", "redis", "celery", "storage"],
     "STARTUP_CHECKS": ["migrations"],
     "READY_CUSTOM_CHECKS": [],
     "STARTUP_CUSTOM_CHECKS": [],
     "DATABASES": ["default"],
+    "STORAGE": {
+        "default": {
+            "CHECK": "exists",
+            "PATH": "probes/ready.txt",
+        },
+        "s3_media": {
+            "CHECK": "write",
+            "PREFIX": "deploy-probes",
+        },
+    },
     "REDIS": {
         "default": {
             "LOCATION": "redis://localhost:6379/0",
@@ -106,6 +118,13 @@ DEPLOY_PROBES = {
     "CLIENT_IP_HEADER": None,
 }
 ```
+
+`STORAGE` supports two practical modes:
+
+- `CHECK="exists"`: verify that a known probe object exists.
+- `CHECK="write"`: create and delete a temporary object to verify write access.
+
+For S3, `exists` is safer when you already manage a sentinel object like `probes/ready.txt`. Use `write` when you want to validate bucket write/delete permissions during readiness checks.
 
 ## Development
 

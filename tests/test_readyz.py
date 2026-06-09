@@ -72,6 +72,19 @@ class CeleryAppMock:
         )
 
 
+class StorageMock:
+    def __init__(self, exists_result=True, exists_should_fail=False, save_should_fail=False):
+        self.exists = mock.Mock(
+            side_effect=Exception("storage exists failed") if exists_should_fail else None,
+            return_value=exists_result,
+        )
+        self.save = mock.Mock(
+            side_effect=Exception("storage save failed") if save_should_fail else None,
+            return_value="django-deploy-probes/probe.txt",
+        )
+        self.delete = mock.Mock()
+
+
 class MigrationGraphMock:
     def __init__(self, targets):
         self.leaf_nodes = mock.Mock(return_value=targets)
@@ -297,6 +310,168 @@ class ReadyzTestCase(SimpleTestCase):
             response.json(),
             {"status": "not_ready", "checks": {"redis.default": "fail"}},
         )
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": [],
+            "STORAGE": {
+                "default": {
+                    "CHECK": "exists",
+                    "PATH": "probes/ready.txt",
+                },
+            },
+        }
+    )
+    def test_readyz_does_not_check_storage_when_storage_is_not_enabled(self):
+        with mock.patch("django_deploy_probes.checks.registry.check_storage") as check_storage:
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ready", "checks": {}})
+        check_storage.assert_not_called()
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "default": {
+                    "CHECK": "exists",
+                    "PATH": "probes/ready.txt",
+                },
+            },
+        }
+    )
+    def test_readyz_returns_200_when_storage_path_exists(self):
+        storage = StorageMock(exists_result=True)
+
+        with mock.patch("django_deploy_probes.checks.storage.storages", {"default": storage}):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ready", "checks": {"storage.default": "ok"}})
+        storage.exists.assert_called_once_with("probes/ready.txt")
+        storage.save.assert_not_called()
+        storage.delete.assert_not_called()
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "default": {
+                    "CHECK": "exists",
+                    "PATH": "probes/optional.txt",
+                    "ALLOW_MISSING": True,
+                },
+            },
+        }
+    )
+    def test_readyz_returns_200_when_storage_path_is_missing_but_allowed(self):
+        storage = StorageMock(exists_result=False)
+
+        with mock.patch("django_deploy_probes.checks.storage.storages", {"default": storage}):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ready", "checks": {"storage.default": "ok"}})
+        storage.exists.assert_called_once_with("probes/optional.txt")
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "default": {
+                    "CHECK": "exists",
+                    "PATH": "probes/required.txt",
+                },
+            },
+        }
+    )
+    def test_readyz_returns_503_when_storage_path_is_missing(self):
+        storage = StorageMock(exists_result=False)
+
+        with mock.patch("django_deploy_probes.checks.storage.storages", {"default": storage}):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            response.json(),
+            {"status": "not_ready", "checks": {"storage.default": "fail"}},
+        )
+        storage.exists.assert_called_once_with("probes/required.txt")
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "default": {
+                    "CHECK": "exists",
+                    "PATH": "probes/ready.txt",
+                },
+            },
+        }
+    )
+    def test_readyz_returns_503_when_storage_exists_check_raises_exception(self):
+        storage = StorageMock(exists_should_fail=True)
+
+        with mock.patch("django_deploy_probes.checks.storage.storages", {"default": storage}):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            response.json(),
+            {"status": "not_ready", "checks": {"storage.default": "fail"}},
+        )
+        storage.exists.assert_called_once_with("probes/ready.txt")
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "media": {
+                    "CHECK": "write",
+                    "PREFIX": "probe-temp",
+                },
+            },
+        }
+    )
+    def test_readyz_returns_200_when_storage_write_check_is_ok(self):
+        storage = StorageMock()
+
+        with mock.patch("django_deploy_probes.checks.storage.storages", {"media": storage}):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"status": "ready", "checks": {"storage.media": "ok"}})
+        storage.exists.assert_not_called()
+        storage.save.assert_called_once()
+        saved_path = storage.save.call_args.args[0]
+        self.assertTrue(saved_path.startswith("probe-temp/probe-"))
+        storage.delete.assert_called_once_with("django-deploy-probes/probe.txt")
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "media": {
+                    "CHECK": "write",
+                    "PREFIX": "probe-temp",
+                },
+            },
+        }
+    )
+    def test_readyz_returns_503_when_storage_write_check_fails(self):
+        storage = StorageMock(save_should_fail=True)
+
+        with mock.patch("django_deploy_probes.checks.storage.storages", {"media": storage}):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(
+            response.json(),
+            {"status": "not_ready", "checks": {"storage.media": "fail"}},
+        )
+        storage.save.assert_called_once()
+        storage.delete.assert_not_called()
 
     @override_settings(
         DEPLOY_PROBES={

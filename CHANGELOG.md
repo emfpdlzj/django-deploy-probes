@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.2.1
+
+Add Django storage probe checks for deployment readiness validation.
+
+### Highlights
+
+- Add builtin `storage` checks for Django storage aliases, including S3-style backends.
+- Support `exists` mode for sentinel object validation.
+- Support `write` mode for temporary write/delete validation.
+- Add Django system checks for invalid storage probe configuration.
+- Update documentation with storage and S3 usage examples.
+
 ## v0.2.0 - Proxy-Aware Probe Security
 
 This release improves probe security for deployments behind trusted reverse proxies such as ALB,
@@ -26,6 +38,7 @@ This release is focused on deployment validation workflows such as blue/green de
 - Add `readyz` endpoint for traffic readiness checks.
 - Add `startupz` endpoint for startup/bootstrap checks.
 - Add `version` endpoint for deployed application metadata.
+- Add builtin `storage` checks for Django storage aliases, including S3-style backends.
 - Support both include-style and import-style Django URL configuration.
 - Support optional readiness checks for Django databases, Redis, Celery, migrations, and custom checks.
 - Add optional package extras for Redis and Celery integrations.

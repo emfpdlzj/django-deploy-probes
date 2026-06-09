@@ -4,6 +4,7 @@ from django.core.checks import Error, Warning, register
 from django.conf import settings
 
 from django_deploy_probes.checks.registry import BUILTIN_CHECKS
+from django_deploy_probes.checks.storage import VALID_STORAGE_CHECKS
 from django_deploy_probes.conf import DEFAULT_DEPLOY_PROBES
 
 
@@ -36,6 +37,7 @@ def check_deploy_probes_settings(app_configs, **kwargs):
     messages.extend(_check_client_ip_header(merged))
     messages.extend(_check_header_token(merged))
     messages.extend(_check_redis_config(merged))
+    messages.extend(_check_storage_config(merged))
     messages.extend(_check_require_checks(merged))
     return messages
 
@@ -221,4 +223,68 @@ def _check_require_checks(probes_settings):
                 id="django_deploy_probes.W003",
             )
         )
+    return messages
+
+
+def _check_storage_config(probes_settings):
+    if "storage" not in probes_settings.get(
+        "READY_CHECKS", []
+    ) and "storage" not in probes_settings.get("STARTUP_CHECKS", []):
+        return []
+
+    storage_settings = probes_settings.get("STORAGE")
+    if not isinstance(storage_settings, dict) or not storage_settings:
+        return [
+            Error(
+                "DEPLOY_PROBES['STORAGE'] must define at least one storage alias when storage is enabled.",
+                id="django_deploy_probes.E013",
+            )
+        ]
+
+    messages = []
+    for alias, config in storage_settings.items():
+        if not isinstance(config, dict):
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['STORAGE']['{alias}'] must be a dictionary.",
+                    id="django_deploy_probes.E014",
+                )
+            )
+            continue
+
+        check_mode = config.get("CHECK", "exists")
+        if check_mode not in VALID_STORAGE_CHECKS:
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['STORAGE']['{alias}']['CHECK'] must be one of: "
+                    f"{', '.join(sorted(VALID_STORAGE_CHECKS))}.",
+                    id="django_deploy_probes.E015",
+                )
+            )
+            continue
+
+        if check_mode == "exists" and not config.get("PATH"):
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['STORAGE']['{alias}']['PATH'] is required for exists checks.",
+                    id="django_deploy_probes.E016",
+                )
+            )
+
+        if "ALLOW_MISSING" in config and not isinstance(config["ALLOW_MISSING"], bool):
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['STORAGE']['{alias}']['ALLOW_MISSING'] must be a boolean.",
+                    id="django_deploy_probes.E017",
+                )
+            )
+
+        if "PREFIX" in config and not isinstance(config["PREFIX"], str):
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['STORAGE']['{alias}']['PREFIX'] must be a string.",
+                    id="django_deploy_probes.E018",
+                )
+            )
+
     return messages

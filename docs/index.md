@@ -28,6 +28,8 @@ pip install "django-deploy-probes[openapi]"
 pip install "django-deploy-probes[all]"
 ```
 
+Storage checks do not require a package extra. They reuse Django storage aliases, so projects already using S3 through `django-storages` can probe those backends directly.
+
 ## Quick Start
 
 Add the app so Django system checks can validate probe settings:

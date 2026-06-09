@@ -4,6 +4,7 @@ from django_deploy_probes.checks.database import check_databases
 from django_deploy_probes.checks.migrations import check_migrations
 from django_deploy_probes.checks.redis import check_redis
 from django_deploy_probes.checks.results import with_duration
+from django_deploy_probes.checks.storage import check_storage
 
 
 BUILTIN_CHECKS = {
@@ -15,6 +16,11 @@ BUILTIN_CHECKS = {
     "redis": lambda probes_settings: (
         check_redis,
         (probes_settings["REDIS"],),
+        {"detail_level": probes_settings["DETAIL_LEVEL"]},
+    ),
+    "storage": lambda probes_settings: (
+        check_storage,
+        (probes_settings["STORAGE"],),
         {"detail_level": probes_settings["DETAIL_LEVEL"]},
     ),
     "celery": lambda probes_settings: (

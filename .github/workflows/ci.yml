@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test:
     name: Python ${{ matrix.python-version }} / Django ${{ matrix.django-version }}
@@ -21,6 +25,20 @@ jobs:
             django-version: "4.2.*"
           - python-version: "3.12"
             django-version: "4.2.*"
+          - python-version: "3.10"
+            django-version: "5.0.*"
+          - python-version: "3.11"
+            django-version: "5.0.*"
+          - python-version: "3.12"
+            django-version: "5.0.*"
+          - python-version: "3.10"
+            django-version: "5.1.*"
+          - python-version: "3.11"
+            django-version: "5.1.*"
+          - python-version: "3.12"
+            django-version: "5.1.*"
+          - python-version: "3.13"
+            django-version: "5.1.*"
           - python-version: "3.10"
             django-version: "5.2.*"
           - python-version: "3.11"
@@ -55,7 +73,16 @@ jobs:
         run: uv run ruff format --check .
 
       - name: Test
-        run: uv run pytest -q --cov --cov-report=term-missing
+        run: uv run pytest -q --cov --cov-report=term-missing --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.12' && matrix.django-version == '5.2.*'
+        uses: codecov/codecov-action@v6
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: true
+          use_oidc: true
+          verbose: true
 
       - name: Build
         run: uv build

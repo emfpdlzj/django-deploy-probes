@@ -56,3 +56,44 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E010", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["storage"], "STORAGE": {}})
+    def test_missing_storage_config_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E013", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {"default": {"CHECK": "ping"}},
+        }
+    )
+    def test_invalid_storage_check_mode_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E015", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {"default": {"CHECK": "exists"}},
+        }
+    )
+    def test_missing_storage_exists_path_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E016", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "default": {"CHECK": "exists", "PATH": "probe.txt", "ALLOW_MISSING": "yes"}
+            },
+        }
+    )
+    def test_invalid_storage_allow_missing_type_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E017", {message.id for message in messages})
