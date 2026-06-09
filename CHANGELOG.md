@@ -26,6 +26,7 @@ This release is focused on deployment validation workflows such as blue/green de
 - Add `readyz` endpoint for traffic readiness checks.
 - Add `startupz` endpoint for startup/bootstrap checks.
 - Add `version` endpoint for deployed application metadata.
+- Add builtin `storage` checks for Django storage aliases, including S3-style backends.
 - Support both include-style and import-style Django URL configuration.
 - Support optional readiness checks for Django databases, Redis, Celery, migrations, and custom checks.
 - Add optional package extras for Redis and Celery integrations.

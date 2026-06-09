@@ -14,6 +14,7 @@ DEFAULT_DEPLOY_PROBES = {
     "READY_CHECKS": [],
     "STARTUP_CHECKS": [],
     "DATABASES": ["default"],
+    "STORAGE": {},
     "REDIS": {},
     "CELERY": {
         "BROKER": False,
