@@ -6,6 +6,8 @@ Thanks for helping improve `django-deploy-probes`.
 
 ```bash
 uv sync --dev
+uv run pre-commit install
+uv run pre-commit run --all-files
 uv run pytest -q
 uv run ruff check .
 uv build

@@ -36,9 +36,7 @@ class DeployProbesCommandTestCase(SimpleTestCase):
         connection = ConnectionMock(should_fail=True)
 
         with (
-            mock.patch(
-                "django_deploy_probes.checks.database.connections", {"default": connection}
-            ),
+            mock.patch("django_deploy_probes.checks.database.connections", {"default": connection}),
             self.assertRaises(SystemExit) as exc_info,
         ):
             call_command("deploy_probes", "readyz", "--json", stdout=stdout)
