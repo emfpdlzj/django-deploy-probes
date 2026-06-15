@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.0
+
+Add an in-process CLI runner for deployment probes.
+
+### Highlights
+
+- Add `python manage.py deploy_probes <healthz|readyz|startupz|version>` management command.
+- Keep the CLI JSON payload contract aligned with the HTTP probe responses.
+- Add explicit CLI exit codes for probe pass, probe failure, invalid configuration, and unexpected execution failure.
+- Extract shared probe execution into a common runner used by both HTTP views and the CLI.
+- Document CLI usage for CI/CD, pre-deploy validation, and local debugging.
+
 ## v0.2.1
 
 Add Django storage probe checks for deployment readiness validation.
