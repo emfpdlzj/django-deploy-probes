@@ -41,3 +41,16 @@ jobs:
 ```
 
 Use token protection for `/readyz`, `/startupz`, and `/version` when validating a public URL.
+
+If the workflow runs inside the Django runtime instead of calling a deployed URL, use the management command directly:
+
+```yaml
+      - name: Check startup in-process
+        run: python manage.py deploy_probes startupz --json
+
+      - name: Check readiness in-process
+        run: python manage.py deploy_probes readyz --json
+
+      - name: Check version in-process
+        run: python manage.py deploy_probes version --json
+```

@@ -4,6 +4,8 @@
 
 Use `/healthz` as a liveness probe, `/startupz` as a startup probe, and `/readyz` as a readiness probe.
 
+The `deploy_probes` management command is useful for CI/CD or one-off debugging, but Kubernetes probes should keep using HTTP endpoints by default.
+
 ## Final Result
 
 Kubernetes waits for startup checks, restarts dead containers, and removes not-ready pods from Service traffic.
