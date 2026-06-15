@@ -52,6 +52,26 @@ Returns deployment metadata. Build details are hidden unless `EXPOSE_BUILD_INFO=
 }
 ```
 
+## Management Command
+
+Run the same probes without going through HTTP:
+
+```bash
+python manage.py deploy_probes healthz --json
+python manage.py deploy_probes readyz --json
+python manage.py deploy_probes startupz --json
+python manage.py deploy_probes version --json
+```
+
+The CLI uses the same JSON payload contract as the HTTP endpoints. This makes it practical for CI/CD jobs, prestart hooks, and local debugging without changing parsers between environments.
+
+Exit codes:
+
+- `0`: probe passed
+- `1`: probe failed
+- `2`: invalid arguments or invalid Django/probe settings
+- `3`: unexpected execution failure
+
 ## Settings
 
 ```python

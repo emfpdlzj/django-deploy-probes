@@ -1,6 +1,6 @@
 # django-deploy-probes
 
-Production-ready HTTP deployment probe endpoints for Django applications.
+Production-ready deployment probes for Django applications, with HTTP endpoints and an in-process CLI runner.
 
 Use `django-deploy-probes` for CI/CD deployment validation, Docker health checks, Kubernetes probes, blue-green deployments, and rollback checks.
 
@@ -53,13 +53,24 @@ urlpatterns = [
 ]
 ```
 
-Verify:
+Verify over HTTP:
 
 ```bash
 curl -f http://localhost:8000/healthz
 curl -f http://localhost:8000/readyz
 curl -f http://localhost:8000/version
 ```
+
+Or run the same probes in-process from Django:
+
+```bash
+python manage.py deploy_probes healthz --json
+python manage.py deploy_probes readyz --json
+python manage.py deploy_probes startupz --json
+python manage.py deploy_probes version --json
+```
+
+The CLI reuses the same probe payload contract as the HTTP endpoints. Use it for CI/CD steps, pre-deploy validation, container bootstrap checks, and local debugging. For Kubernetes liveness, readiness, and startup probes, keep using HTTP endpoints as the default integration.
 
 Custom check messages are hidden by default. If you enable `EXPOSE_CHECK_MESSAGES=True`, do not include secrets or sensitive values in those messages.
 
