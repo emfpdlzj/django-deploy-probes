@@ -10,6 +10,7 @@ uv run pre-commit install
 uv run pre-commit run --all-files
 uv run pytest -q
 uv run ruff check .
+uv run mkdocs build --strict
 uv build
 ```
 
@@ -24,6 +25,7 @@ uv build
 
 1. Update the version in `django_deploy_probes/__init__.py`.
 2. Update `CHANGELOG.md`.
-3. Run tests, lint, and build locally.
-4. Merge the version bump PR into `main`. This creates a draft GitHub release and tag automatically.
-5. Review and publish the draft GitHub release. The publish workflow uses PyPI Trusted Publishing.
+3. Run tests, lint, docs build, and build locally.
+4. Smoke-install the built wheel in a clean virtualenv.
+5. Merge the version bump PR into `main`. This creates a draft GitHub release and tag automatically.
+6. Review and publish the draft GitHub release. The publish workflow uses PyPI Trusted Publishing.

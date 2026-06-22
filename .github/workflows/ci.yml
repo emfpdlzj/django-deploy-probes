@@ -74,6 +74,10 @@ jobs:
       - name: Test
         run: uv run pytest -q --cov --cov-report=term-missing --cov-report=xml
 
+      - name: Build docs
+        if: matrix.python-version == '3.12' && matrix.django-version == '5.2.*'
+        run: uv run mkdocs build --strict
+
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.12' && matrix.django-version == '5.2.*' && env.CODECOV_TOKEN != ''
         uses: codecov/codecov-action@v5

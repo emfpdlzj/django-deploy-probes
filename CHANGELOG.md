@@ -1,5 +1,16 @@
 # Changelog
 
+## v0.3.1
+
+Stabilize release hygiene, strengthen edge-case coverage, and harden publish automation.
+
+### Highlights
+
+- Add regression tests for registry, result normalization, security helper, and Django system check edge cases.
+- Add release hygiene tests to keep package version, changelog, and localized build/install docs aligned.
+- Add wheel smoke-install verification to publish workflows before PyPI or TestPyPI upload.
+- Add strict MkDocs validation to the main CI workflow and refresh example version strings in docs.
+
 ## v0.3.0
 
 Add an in-process CLI runner for deployment probes.

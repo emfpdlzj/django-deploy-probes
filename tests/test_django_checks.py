@@ -3,6 +3,18 @@ from django.test import SimpleTestCase, override_settings
 
 
 class DjangoChecksTestCase(SimpleTestCase):
+    @override_settings(DEPLOY_PROBES="invalid")
+    def test_non_dict_deploy_probes_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E001", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"UNUSED_FLAG": True})
+    def test_unknown_setting_key_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.W001", {message.id for message in messages})
+
     @override_settings(DEPLOY_PROBES={"DETAIL_LEVEL": "verbose"})
     def test_invalid_detail_level_is_reported(self):
         messages = run_checks()
@@ -51,11 +63,46 @@ class DjangoChecksTestCase(SimpleTestCase):
 
         self.assertIn("django_deploy_probes.E007", {message.id for message in messages})
 
+    @override_settings(DEPLOY_PROBES={"HEADER_TOKEN_VALIDATION": True})
+    def test_invalid_header_token_validation_type_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E006", {message.id for message in messages})
+
     @override_settings(DEPLOY_PROBES={"READY_CUSTOM_CHECKS": "tests.checks.ready"})
     def test_invalid_custom_check_list_is_reported(self):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E010", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"REQUIRE_READY_CHECKS": True, "READY_CHECKS": []})
+    def test_empty_required_ready_checks_are_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.W002", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"REQUIRE_STARTUP_CHECKS": True, "STARTUP_CHECKS": []})
+    def test_empty_required_startup_checks_are_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.W003", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["redis"], "REDIS": {}})
+    def test_missing_redis_config_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E008", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["redis"],
+            "REDIS": {"default": {}},
+        }
+    )
+    def test_missing_redis_location_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E009", {message.id for message in messages})
 
     @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["storage"], "STORAGE": {}})
     def test_missing_storage_config_is_reported(self):
@@ -97,3 +144,30 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E017", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {"default": "invalid"},
+        }
+    )
+    def test_non_dict_storage_alias_config_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E014", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {
+                "default": {
+                    "CHECK": "write",
+                    "PREFIX": 123,
+                }
+            },
+        }
+    )
+    def test_invalid_storage_prefix_type_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E018", {message.id for message in messages})

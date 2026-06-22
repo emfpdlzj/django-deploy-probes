@@ -26,6 +26,24 @@ jobs:
       - name: Build
         run: uv build
 
+      - name: Smoke install built wheel
+        run: |
+          PACKAGE_VERSION=$(python - <<'PY'
+          from pathlib import Path
+          import re
+
+          content = Path("django_deploy_probes/__init__.py").read_text()
+          match = re.search(r'__version__ = "([^"]+)"', content)
+          if not match:
+              raise SystemExit("Could not find __version__ in django_deploy_probes/__init__.py")
+          print(match.group(1))
+          PY
+          )
+          python -m venv .venv-smoke
+          . .venv-smoke/bin/activate
+          pip install dist/*.whl
+          python -c "import django_deploy_probes; assert django_deploy_probes.__version__ == '$PACKAGE_VERSION'"
+
       - name: Publish to TestPyPI
         run: uv publish --publish-url https://test.pypi.org/legacy/ --token "$TEST_PYPI_API_TOKEN"
         env:

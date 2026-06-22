@@ -1,8 +1,18 @@
-from django.test import SimpleTestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, override_settings
 from django.urls import reverse
+
+from django_deploy_probes.security import (
+    get_request_ip,
+    is_internal_ip,
+    security_forbidden_response,
+)
 
 
 class SecurityTestCase(SimpleTestCase):
+    def setUp(self):
+        super().setUp()
+        self.factory = RequestFactory()
+
     @override_settings(DEPLOY_PROBES={"INTERNAL_IP_ONLY": True})
     def test_internal_ip_request_is_allowed(self):
         response = self.client.get(
@@ -197,3 +207,68 @@ class SecurityTestCase(SimpleTestCase):
 
         self.assertEqual(response.status_code, 403)
         self.assertNotIn("secret-token", response.content.decode())
+
+    def test_invalid_ip_or_network_is_not_treated_as_internal(self):
+        self.assertFalse(is_internal_ip("not-an-ip", ["10.0.0.0/8"]))
+        self.assertFalse(is_internal_ip("10.0.0.1", ["not-a-cidr"]))
+
+    def test_missing_forwarded_header_falls_back_to_remote_addr(self):
+        request = self.factory.get("/version", REMOTE_ADDR="192.0.2.10")
+
+        client_ip = get_request_ip(
+            request,
+            {
+                "CLIENT_IP_HEADER": "X-Forwarded-For",
+                "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24"],
+            },
+        )
+
+        self.assertEqual(client_ip, "192.0.2.10")
+
+    def test_invalid_forwarded_ip_falls_back_to_remote_addr(self):
+        request = self.factory.get(
+            "/version",
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_FORWARDED_FOR="not-an-ip",
+        )
+
+        client_ip = get_request_ip(
+            request,
+            {
+                "CLIENT_IP_HEADER": "X-Forwarded-For",
+                "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24"],
+            },
+        )
+
+        self.assertEqual(client_ip, "192.0.2.10")
+
+    def test_x_forwarded_for_uses_leftmost_hop_when_every_hop_is_trusted(self):
+        request = self.factory.get(
+            "/version",
+            REMOTE_ADDR="192.0.2.10",
+            HTTP_X_FORWARDED_FOR="10.1.1.5, 10.2.2.6",
+        )
+
+        client_ip = get_request_ip(
+            request,
+            {
+                "CLIENT_IP_HEADER": "X-Forwarded-For",
+                "TRUSTED_PROXY_NETWORKS": ["192.0.2.0/24", "10.0.0.0/8"],
+            },
+        )
+
+        self.assertEqual(client_ip, "10.1.1.5")
+
+    def test_non_dict_header_token_validation_is_rejected(self):
+        request = self.factory.get("/readyz")
+
+        response = security_forbidden_response(
+            request,
+            {
+                "INTERNAL_IP_ONLY": False,
+                "INTERNAL_IP_NETWORKS": [],
+                "HEADER_TOKEN_VALIDATION": "enabled",
+            },
+        )
+
+        self.assertEqual(response.status_code, 403)
