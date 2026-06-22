@@ -31,6 +31,18 @@ class DeployProbesCommandTestCase(SimpleTestCase):
         )
 
     @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["database"], "DATABASES": ["default"]})
+    def test_readyz_plain_output_renders_multiline_check_summary(self):
+        stdout = StringIO()
+        connection = ConnectionMock()
+
+        with mock.patch(
+            "django_deploy_probes.checks.database.connections", {"default": connection}
+        ):
+            call_command("deploy_probes", "readyz", stdout=stdout)
+
+        self.assertEqual(stdout.getvalue().strip(), "ready\ndatabase.default: ok")
+
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["database"], "DATABASES": ["default"]})
     def test_readyz_returns_exit_code_1_when_probe_fails(self):
         stdout = StringIO()
         connection = ConnectionMock(should_fail=True)
@@ -47,6 +59,26 @@ class DeployProbesCommandTestCase(SimpleTestCase):
             '{"status": "not_ready", "checks": {"database.default": "fail"}}',
         )
 
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["database"],
+            "DATABASES": ["default"],
+            "INCLUDE_CHECK_DURATIONS": True,
+        }
+    )
+    def test_readyz_plain_output_formats_dict_check_results(self):
+        stdout = StringIO()
+        connection = ConnectionMock()
+
+        with mock.patch(
+            "django_deploy_probes.checks.database.connections", {"default": connection}
+        ):
+            call_command("deploy_probes", "readyz", stdout=stdout)
+
+        lines = stdout.getvalue().strip().splitlines()
+        self.assertEqual(lines[0], "ready")
+        self.assertIn('database.default: {"status": "ok", "duration_ms": ', lines[1])
+
     @override_settings(DEPLOY_PROBES={"EXPOSE_VERSION": False})
     def test_version_remains_available_from_cli(self):
         stdout = StringIO()
@@ -56,6 +88,16 @@ class DeployProbesCommandTestCase(SimpleTestCase):
         self.assertEqual(
             stdout.getvalue().strip(),
             '{"service": "django-app", "environment": "local", "version": "unknown"}',
+        )
+
+    def test_version_plain_output_renders_key_value_lines(self):
+        stdout = StringIO()
+
+        call_command("deploy_probes", "version", stdout=stdout)
+
+        self.assertEqual(
+            stdout.getvalue().strip(),
+            "service=test-service\nenvironment=local\nversion=unknown",
         )
 
     @override_settings(DEPLOY_PROBES={"DETAIL_LEVEL": "verbose"})

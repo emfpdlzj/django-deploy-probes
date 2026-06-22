@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.3.1
+
+Polish the `0.3.x` release line with stronger documentation accuracy, example validation, and
+release smoke testing.
+
+### Highlights
+
+- Refresh example and documentation version values so runnable snippets stay aligned with the
+  current release line.
+- Add pytest smoke tests for bundled example Django projects.
+- Add package-install smoke checks to CI and publish workflows before uploading release artifacts.
+
 ## v0.3.0
 
 Add an in-process CLI runner for deployment probes.

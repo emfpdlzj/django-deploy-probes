@@ -20,7 +20,7 @@ class VersionTestCase(SimpleTestCase):
         DEPLOY_PROBES={
             "SERVICE_NAME": "billing-api",
             "ENVIRONMENT": "prod",
-            "VERSION": "1.2.0",
+            "VERSION": "0.3.1",
             "COMMIT": "a1b2c3d",
             "BRANCH": "main",
             "BUILD_TIME": "2026-05-13T10:00:00+09:00",
@@ -36,7 +36,7 @@ class VersionTestCase(SimpleTestCase):
             {
                 "service": "billing-api",
                 "environment": "prod",
-                "version": "1.2.0",
+                "version": "0.3.1",
             },
         )
 
@@ -44,7 +44,7 @@ class VersionTestCase(SimpleTestCase):
         DEPLOY_PROBES={
             "SERVICE_NAME": "billing-api",
             "ENVIRONMENT": "prod",
-            "VERSION": "1.2.0",
+            "VERSION": "0.3.1",
             "COMMIT": "a1b2c3d",
             "BRANCH": "main",
             "BUILD_TIME": "2026-05-13T10:00:00+09:00",
@@ -61,7 +61,7 @@ class VersionTestCase(SimpleTestCase):
             {
                 "service": "billing-api",
                 "environment": "prod",
-                "version": "1.2.0",
+                "version": "0.3.1",
                 "commit": "a1b2c3d",
                 "branch": "main",
                 "build_time": "2026-05-13T10:00:00+09:00",

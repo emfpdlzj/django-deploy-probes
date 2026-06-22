@@ -27,5 +27,11 @@ jobs:
       - name: Build
         run: uv build
 
+      - name: Smoke test built wheel
+        run: bash scripts/smoke_install.sh wheel
+
+      - name: Smoke test built source distribution
+        run: bash scripts/smoke_install.sh sdist
+
       - name: Publish to PyPI
         run: uv publish --trusted-publishing always

@@ -48,7 +48,7 @@ Returns deployment metadata. Build details are hidden unless `EXPOSE_BUILD_INFO=
 {
   "service": "my-django-app",
   "environment": "prod",
-  "version": "1.2.0"
+  "version": "0.3.1"
 }
 ```
 

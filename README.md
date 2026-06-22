@@ -84,7 +84,7 @@ Storage checks use Django storage aliases, so the same probe can validate local 
 DEPLOY_PROBES = {
     "SERVICE_NAME": "my-django-app",
     "ENVIRONMENT": "prod",
-    "VERSION": "1.2.0",
+    "VERSION": "0.3.1",
     "READY_CHECKS": ["database", "redis", "celery", "storage"],
     "STARTUP_CHECKS": ["migrations"],
     "READY_CUSTOM_CHECKS": [],

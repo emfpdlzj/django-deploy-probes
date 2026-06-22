@@ -26,7 +26,11 @@ jobs:
       - name: Build
         run: uv build
 
+      - name: Smoke test built wheel
+        run: bash scripts/smoke_install.sh wheel
+
+      - name: Smoke test built source distribution
+        run: bash scripts/smoke_install.sh sdist
+
       - name: Publish to TestPyPI
-        run: uv publish --publish-url https://test.pypi.org/legacy/ --token "$TEST_PYPI_API_TOKEN"
-        env:
-          TEST_PYPI_API_TOKEN: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        run: uv publish --trusted-publishing always --publish-url https://test.pypi.org/legacy/

@@ -17,8 +17,8 @@ Copy-paste ready deployment probe tutorials for Django.
 
 ## Runnable Examples
 
-- [examples/basic](../examples/basic)
-- [examples/docker](../examples/docker)
-- [examples/docker-compose](../examples/docker-compose)
-- [examples/kubernetes](../examples/kubernetes)
-- [examples/security](../examples/security)
+- [Basic example (GitHub)](https://github.com/emfpdlzj/django-deploy-probes/tree/main/examples/basic)
+- [Docker example (GitHub)](https://github.com/emfpdlzj/django-deploy-probes/tree/main/examples/docker)
+- [Docker Compose example (GitHub)](https://github.com/emfpdlzj/django-deploy-probes/tree/main/examples/docker-compose)
+- [Kubernetes example (GitHub)](https://github.com/emfpdlzj/django-deploy-probes/tree/main/examples/kubernetes)
+- [Security example (GitHub)](https://github.com/emfpdlzj/django-deploy-probes/tree/main/examples/security)
