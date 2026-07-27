@@ -19,6 +19,13 @@ Use this package when you need lightweight runtime endpoints for CI/CD validatio
 pip install django-deploy-probes
 ```
 
+Supported runtimes:
+
+- Python 3.10 through 3.14
+- Django 5.2 LTS and Django 6.0
+
+Use the `0.3.x` release line for projects that still require Django 4.2.
+
 Optional checks are available as extras:
 
 ```bash
