@@ -2,7 +2,17 @@ from unittest import mock
 
 from django.test import SimpleTestCase
 
-from django_deploy_probes.checks.results import check_is_ok, normalize_check_result, with_duration
+from django_deploy_probes.checks.results import (
+    check_is_ok,
+    failure_result_for_exception,
+    is_timeout_exception,
+    normalize_check_result,
+    with_duration,
+)
+
+
+class ReadTimeoutError(Exception):
+    pass
 
 
 class ResultsTestCase(SimpleTestCase):
@@ -49,3 +59,27 @@ class ResultsTestCase(SimpleTestCase):
         results = with_duration(lambda: {"database.default": "ok"}, include_duration=False)
 
         self.assertEqual(results, {"database.default": "ok"})
+
+    def test_timeout_detection_supports_builtin_and_backend_exceptions(self):
+        self.assertTrue(is_timeout_exception(TimeoutError()))
+        self.assertTrue(is_timeout_exception(ReadTimeoutError()))
+        self.assertFalse(is_timeout_exception(RuntimeError()))
+
+    def test_timeout_detection_walks_wrapped_exception_chain(self):
+        try:
+            try:
+                raise TimeoutError("socket timed out")
+            except TimeoutError as exc:
+                raise RuntimeError("backend request failed") from exc
+        except RuntimeError as exc:
+            self.assertTrue(is_timeout_exception(exc))
+
+    def test_exception_failure_result_uses_timeout_safe_reason(self):
+        self.assertEqual(
+            failure_result_for_exception(TimeoutError(), "query_failed", "safe"),
+            {"status": "fail", "reason": "timeout"},
+        )
+        self.assertEqual(
+            failure_result_for_exception(TimeoutError(), "query_failed", "none"),
+            "fail",
+        )

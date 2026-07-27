@@ -63,6 +63,7 @@ def run_configured_checks(probes_settings, check_names, custom_check_paths=None)
                 check_custom_checks,
                 custom_check_paths,
                 expose_messages=probes_settings["EXPOSE_CHECK_MESSAGES"],
+                detail_level=probes_settings["DETAIL_LEVEL"],
                 include_duration=include_duration,
             )
         )

@@ -1,5 +1,7 @@
 from django.utils.module_loading import import_string
 
+from django_deploy_probes.checks.results import failure_result_for_exception
+
 
 def _default_check_name(dotted_path):
     return dotted_path.rsplit(".", 1)[-1]
@@ -23,7 +25,7 @@ def _normalize_custom_result(dotted_path, result, expose_messages):
     return {default_name: "fail"}
 
 
-def check_custom_checks(custom_check_paths, expose_messages=False):
+def check_custom_checks(custom_check_paths, expose_messages=False, detail_level="none"):
     results = {}
 
     for dotted_path in custom_check_paths:
@@ -38,7 +40,11 @@ def check_custom_checks(custom_check_paths, expose_messages=False):
                     expose_messages,
                 )
             )
-        except Exception:
-            results[_default_check_name(dotted_path)] = "fail"
+        except Exception as exc:
+            results[_default_check_name(dotted_path)] = failure_result_for_exception(
+                exc,
+                "custom_check_failed",
+                detail_level,
+            )
 
     return results

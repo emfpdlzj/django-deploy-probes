@@ -48,7 +48,6 @@ DEFAULT_DEPLOY_PROBES = {
     "HEADER_TOKEN_VALIDATION": False,
     "ENABLE_OPENAPI": False,
     "OPENAPI_TAG": "Deployment Probes",
-    "TIMEOUT": 1.0,
 }
 
 

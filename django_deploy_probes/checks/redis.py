@@ -1,3 +1,9 @@
+from django_deploy_probes.checks.results import (
+    failure_result,
+    failure_result_for_exception,
+)
+
+
 def _get_redis_client(location, timeout):
     import redis
 
@@ -6,12 +12,6 @@ def _get_redis_client(location, timeout):
         socket_connect_timeout=timeout,
         socket_timeout=timeout,
     )
-
-
-def _fail_result(reason, detail_level):
-    if detail_level == "safe":
-        return {"status": "fail", "reason": reason}
-    return "fail"
 
 
 def check_redis(redis_settings, detail_level="none"):
@@ -25,11 +25,15 @@ def check_redis(redis_settings, detail_level="none"):
             )
             client.ping()
         except ImportError:
-            results[check_name] = _fail_result("redis_package_missing", detail_level)
+            results[check_name] = failure_result("redis_package_missing", detail_level)
         except KeyError:
-            results[check_name] = _fail_result("location_missing", detail_level)
-        except Exception:
-            results[check_name] = _fail_result("ping_failed", detail_level)
+            results[check_name] = failure_result("location_missing", detail_level)
+        except Exception as exc:
+            results[check_name] = failure_result_for_exception(
+                exc,
+                "ping_failed",
+                detail_level,
+            )
         else:
             results[check_name] = "ok"
     return results
