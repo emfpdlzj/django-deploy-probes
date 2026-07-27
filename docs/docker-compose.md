@@ -53,7 +53,7 @@ services:
       - "8000:8000"
     environment:
       DJANGO_ENV: prod
-      APP_VERSION: 0.3.1
+      APP_VERSION: 0.4.0
       GIT_COMMIT: local
       GIT_BRANCH: main
       BUILD_TIME: "2026-05-17T00:00:00+09:00"

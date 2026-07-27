@@ -2,6 +2,11 @@
 
 ## Supported versions
 
+| Release | Python | Django | Security support |
+| --- | --- | --- | --- |
+| 0.4.x | 3.10–3.14 | 5.2 LTS, 6.0 | Supported |
+| 0.3.x | 3.9–3.14 | 4.2–5.2 | Ended |
+
 Security fixes are provided for the latest released minor version.
 
 ## Reporting a vulnerability

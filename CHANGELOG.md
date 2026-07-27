@@ -1,5 +1,24 @@
 # Changelog
 
+## v0.4.0
+
+Modernize the supported runtime baseline around maintained Python and Django releases.
+
+### Highlights
+
+- Add Django 6.0 compatibility and CI coverage on Python 3.12 through 3.14.
+- Keep Django 5.2 LTS coverage on Python 3.10 through 3.14.
+- Drop support for end-of-life Python 3.9 and Django releases before 5.2.
+- Run the compatibility suite with Python deprecation warnings enabled.
+- Publish the supported runtime policy in the README, support guide, and security policy.
+
+### Upgrade notes
+
+- Projects using Django 4.2, 5.0, or 5.1 should remain on `django-deploy-probes<0.4`
+  until they upgrade to Django 5.2 or later.
+- Python 3.9 users should remain on `django-deploy-probes<0.4` or upgrade Python.
+- No probe endpoint, setting, payload, or management command behavior changed in this release.
+
 ## v0.3.1
 
 Stabilize release hygiene, strengthen edge-case coverage, and harden publish automation.
