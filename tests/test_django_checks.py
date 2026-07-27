@@ -171,3 +171,52 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E018", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"TIMEOUT": 0.5})
+    def test_removed_global_timeout_is_reported(self):
+        messages = run_checks()
+        message_ids = {message.id for message in messages}
+
+        self.assertIn("django_deploy_probes.E019", message_ids)
+        self.assertNotIn("django_deploy_probes.W001", message_ids)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "STARTUP_CHECKS": ["redis"],
+            "REDIS": {
+                "default": {
+                    "LOCATION": "redis://localhost:6379/0",
+                    "TIMEOUT": 0,
+                }
+            },
+        }
+    )
+    def test_invalid_redis_timeout_is_reported_for_startup_check(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E020", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["celery"],
+            "CELERY": "invalid",
+        }
+    )
+    def test_invalid_celery_config_type_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E021", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["celery"],
+            "CELERY": {
+                "BROKER": True,
+                "TIMEOUT": False,
+            },
+        }
+    )
+    def test_invalid_celery_timeout_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E022", {message.id for message in messages})

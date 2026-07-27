@@ -144,6 +144,23 @@ DEPLOY_PROBES = {
 
 For S3, `exists` is safer when you already manage a sentinel object like `probes/ready.txt`. Use `write` when you want to validate bucket write/delete permissions during readiness checks.
 
+### Timeout contract
+
+There is no global probe timeout. Redis and Celery apply their `TIMEOUT` values only
+to operations whose client APIs support a real timeout:
+
+- `REDIS[alias]["TIMEOUT"]`: Redis connect and socket timeout.
+- `CELERY["TIMEOUT"]`: Celery broker connection and worker ping timeout.
+
+Database, migration, storage, Celery result backend, and custom checks use their
+backend-native timeout configuration. Checks run sequentially, so set Kubernetes
+`timeoutSeconds` or an upstream load balancer timeout above the worst-case sum of the
+enabled checks.
+
+With `DETAIL_LEVEL="safe"`, recognized timeout exceptions return
+`{"status": "fail", "reason": "timeout"}`. See the
+[timeout contract](docs/api.md#timeout-contract) for configuration guidance.
+
 ## Development
 
 ```bash

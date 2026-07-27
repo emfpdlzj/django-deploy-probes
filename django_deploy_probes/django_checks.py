@@ -9,6 +9,7 @@ from django_deploy_probes.conf import DEFAULT_DEPLOY_PROBES
 
 
 VALID_DETAIL_LEVELS = {"none", "safe"}
+REMOVED_SETTINGS = {"TIMEOUT"}
 
 
 @register()
@@ -25,6 +26,7 @@ def check_deploy_probes_settings(app_configs, **kwargs):
         ]
 
     merged = DEFAULT_DEPLOY_PROBES | configured
+    messages.extend(_check_removed_settings(configured))
     messages.extend(_check_unknown_keys(configured))
     messages.extend(_check_check_list("READY_CHECKS", merged))
     messages.extend(_check_check_list("STARTUP_CHECKS", merged))
@@ -37,6 +39,7 @@ def check_deploy_probes_settings(app_configs, **kwargs):
     messages.extend(_check_client_ip_header(merged))
     messages.extend(_check_header_token(merged))
     messages.extend(_check_redis_config(merged))
+    messages.extend(_check_celery_config(merged))
     messages.extend(_check_storage_config(merged))
     messages.extend(_check_require_checks(merged))
     return messages
@@ -49,7 +52,19 @@ def _check_unknown_keys(configured):
             id="django_deploy_probes.W001",
         )
         for key in configured
-        if key not in DEFAULT_DEPLOY_PROBES
+        if key not in DEFAULT_DEPLOY_PROBES and key not in REMOVED_SETTINGS
+    ]
+
+
+def _check_removed_settings(configured):
+    if "TIMEOUT" not in configured:
+        return []
+    return [
+        Error(
+            "DEPLOY_PROBES['TIMEOUT'] is not supported. Configure timeout values on each "
+            "dependency check or backend instead.",
+            id="django_deploy_probes.E019",
+        )
     ]
 
 
@@ -183,7 +198,7 @@ def _check_header_token(probes_settings):
 
 
 def _check_redis_config(probes_settings):
-    if "redis" not in probes_settings.get("READY_CHECKS", []):
+    if not _check_is_enabled("redis", probes_settings):
         return []
 
     redis_settings = probes_settings.get("REDIS")
@@ -204,7 +219,49 @@ def _check_redis_config(probes_settings):
                     id="django_deploy_probes.E009",
                 )
             )
+            continue
+        if "TIMEOUT" in config and not _is_positive_number(config["TIMEOUT"]):
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['REDIS']['{alias}']['TIMEOUT'] must be a positive number.",
+                    id="django_deploy_probes.E020",
+                )
+            )
     return messages
+
+
+def _check_celery_config(probes_settings):
+    if not _check_is_enabled("celery", probes_settings):
+        return []
+
+    celery_settings = probes_settings.get("CELERY")
+    if not isinstance(celery_settings, dict):
+        return [
+            Error(
+                "DEPLOY_PROBES['CELERY'] must be a dictionary when celery is enabled.",
+                id="django_deploy_probes.E021",
+            )
+        ]
+
+    timeout = celery_settings.get("TIMEOUT", DEFAULT_DEPLOY_PROBES["CELERY"]["TIMEOUT"])
+    if not _is_positive_number(timeout):
+        return [
+            Error(
+                "DEPLOY_PROBES['CELERY']['TIMEOUT'] must be a positive number.",
+                id="django_deploy_probes.E022",
+            )
+        ]
+    return []
+
+
+def _check_is_enabled(check_name, probes_settings):
+    return check_name in probes_settings.get(
+        "READY_CHECKS", []
+    ) or check_name in probes_settings.get("STARTUP_CHECKS", [])
+
+
+def _is_positive_number(value):
+    return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
 
 
 def _check_require_checks(probes_settings):

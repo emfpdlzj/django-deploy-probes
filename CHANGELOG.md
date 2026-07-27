@@ -1,5 +1,33 @@
 # Changelog
 
+## v0.5.0
+
+Make timeout behavior an explicit, backend-enforced contract.
+
+### Highlights
+
+- Remove the unused top-level `DEPLOY_PROBES["TIMEOUT"]` setting and report it as a
+  Django system check error.
+- Define `REDIS[*]["TIMEOUT"]` as the Redis connect and socket timeout.
+- Define `CELERY["TIMEOUT"]` as the broker connection and worker ping timeout.
+- Clarify that database, migration, storage, Celery result backend, and custom checks
+  must use their backend-native timeout configuration.
+- Return the stable safe failure reason `reason="timeout"` when a recognized timeout
+  exception is raised.
+- Validate Redis and Celery timeout values before deployment.
+- Keep checks sequential and document how to size the platform probe timeout around
+  the worst-case configured check duration.
+
+### Upgrade notes
+
+- Remove any top-level `DEPLOY_PROBES["TIMEOUT"]` value. It was accepted but never
+  enforced in earlier releases.
+- Configure database driver and statement timeouts in Django `DATABASES`, storage
+  timeouts in the storage backend, and result backend timeouts in Celery itself.
+- Custom checks must configure timeout behavior in their own network client and let
+  timeout exceptions propagate.
+- No endpoint URL, successful response payload, or management command exit code changed.
+
 ## v0.4.0
 
 Modernize the supported runtime baseline around maintained Python and Django releases.

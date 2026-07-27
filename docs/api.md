@@ -151,6 +151,47 @@ With `INCLUDE_CHECK_DURATIONS=True`, every check is wrapped with `status` and `d
 }
 ```
 
+## Timeout Contract
+
+`django-deploy-probes` does not provide a global wall-clock timeout. The old top-level
+`DEPLOY_PROBES["TIMEOUT"]` setting was never enforced and is rejected by the Django
+system check in v0.5.0.
+
+Generic cancellation is not safe for arbitrary synchronous Django and custom checks:
+returning from an HTTP request cannot safely stop a database query, storage operation,
+or user callable that is still running. Timeout enforcement therefore belongs to the
+client or backend that can cancel the underlying I/O.
+
+| Check | Timeout contract |
+| --- | --- |
+| Redis | `REDIS[alias]["TIMEOUT"]` controls connect and socket timeouts. |
+| Celery broker | `CELERY["TIMEOUT"]` controls broker connection attempts. |
+| Celery workers | `CELERY["TIMEOUT"]` is passed to `control.ping()`. |
+| Celery result backend | Configure the timeout in the Celery result backend transport. |
+| Database and migrations | Configure driver connection and statement timeouts in Django `DATABASES`. |
+| Storage | Configure connect/read timeouts on the Django storage backend. |
+| Custom checks | Configure the called client and propagate its timeout exception. |
+
+Redis and Celery timeout settings must be positive numbers. For operations configured
+outside this package, built-in `TimeoutError` and common backend exceptions such as
+`ReadTimeoutError` and `ConnectTimeoutError` are recognized. With
+`DETAIL_LEVEL="safe"`, they produce:
+
+```json
+{
+  "status": "fail",
+  "reason": "timeout"
+}
+```
+
+With the default `DETAIL_LEVEL="none"`, the same failure remains the secret-safe string
+`"fail"`.
+
+Checks currently run sequentially. Size Kubernetes `timeoutSeconds`, load balancer
+timeouts, and CLI job timeouts above the worst-case sum of all configured dependency
+timeouts. Internal parallel execution and result caching are intentionally not part of
+this contract.
+
 ## Storage Checks
 
 The builtin `storage` check uses Django storage aliases from `STORAGES`. That means the same probe works for local filesystem storage, S3 backends, and custom storage implementations that honor Django's storage API.

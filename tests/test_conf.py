@@ -4,12 +4,12 @@ from django_deploy_probes.conf import get_deploy_probes_settings
 
 
 class DeployProbesSettingsTestCase(SimpleTestCase):
-    @override_settings(DEPLOY_PROBES={"SERVICE_NAME": "api", "TIMEOUT": 0.5})
+    @override_settings(DEPLOY_PROBES={"SERVICE_NAME": "api"})
     def test_settings_loader_merges_configured_values_with_defaults(self):
         probes_settings = get_deploy_probes_settings()
 
         self.assertEqual(probes_settings["SERVICE_NAME"], "api")
-        self.assertEqual(probes_settings["TIMEOUT"], 0.5)
+        self.assertNotIn("TIMEOUT", probes_settings)
         self.assertEqual(probes_settings["VERSION"], "unknown")
         self.assertEqual(probes_settings["READY_CHECKS"], [])
         self.assertEqual(probes_settings["READY_CUSTOM_CHECKS"], [])

@@ -3,15 +3,14 @@ from uuid import uuid4
 from django.core.files.base import ContentFile
 from django.core.files.storage import storages
 
+from django_deploy_probes.checks.results import (
+    failure_result,
+    failure_result_for_exception,
+)
+
 
 VALID_STORAGE_CHECKS = {"exists", "write"}
 DEFAULT_WRITE_PREFIX = "django-deploy-probes"
-
-
-def _fail_result(reason, detail_level):
-    if detail_level == "safe":
-        return {"status": "fail", "reason": reason}
-    return "fail"
 
 
 def _build_probe_path(prefix):
@@ -31,8 +30,12 @@ def check_storage(storage_settings, detail_level="none"):
 
         try:
             storage = storages[alias]
-        except Exception:
-            results[check_name] = _fail_result("storage_alias_unavailable", detail_level)
+        except Exception as exc:
+            results[check_name] = failure_result_for_exception(
+                exc,
+                "storage_alias_unavailable",
+                detail_level,
+            )
             continue
 
         if check_mode == "exists":
@@ -40,13 +43,17 @@ def check_storage(storage_settings, detail_level="none"):
             allow_missing = config.get("ALLOW_MISSING", False)
             try:
                 exists = storage.exists(path)
-            except Exception:
-                results[check_name] = _fail_result("exists_failed", detail_level)
+            except Exception as exc:
+                results[check_name] = failure_result_for_exception(
+                    exc,
+                    "exists_failed",
+                    detail_level,
+                )
             else:
                 if exists or allow_missing:
                     results[check_name] = "ok"
                 else:
-                    results[check_name] = _fail_result("path_missing", detail_level)
+                    results[check_name] = failure_result("path_missing", detail_level)
             continue
 
         if check_mode == "write":
@@ -54,12 +61,16 @@ def check_storage(storage_settings, detail_level="none"):
             try:
                 saved_name = storage.save(probe_path, ContentFile(b"ok\n"))
                 storage.delete(saved_name)
-            except Exception:
-                results[check_name] = _fail_result("write_failed", detail_level)
+            except Exception as exc:
+                results[check_name] = failure_result_for_exception(
+                    exc,
+                    "write_failed",
+                    detail_level,
+                )
             else:
                 results[check_name] = "ok"
             continue
 
-        results[check_name] = _fail_result("invalid_storage_check", detail_level)
+        results[check_name] = failure_result("invalid_storage_check", detail_level)
 
     return results

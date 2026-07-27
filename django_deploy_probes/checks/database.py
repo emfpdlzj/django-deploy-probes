@@ -1,10 +1,6 @@
 from django.db import connections
 
-
-def _fail_result(reason, detail_level):
-    if detail_level == "safe":
-        return {"status": "fail", "reason": reason}
-    return "fail"
+from django_deploy_probes.checks.results import failure_result_for_exception
 
 
 def check_databases(aliases, detail_level="none"):
@@ -14,8 +10,12 @@ def check_databases(aliases, detail_level="none"):
         try:
             with connections[alias].cursor() as cursor:
                 cursor.execute("SELECT 1")
-        except Exception:
-            results[check_name] = _fail_result("query_failed", detail_level)
+        except Exception as exc:
+            results[check_name] = failure_result_for_exception(
+                exc,
+                "query_failed",
+                detail_level,
+            )
         else:
             results[check_name] = "ok"
     return results
