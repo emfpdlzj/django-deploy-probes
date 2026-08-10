@@ -75,6 +75,31 @@ class DjangoChecksTestCase(SimpleTestCase):
 
         self.assertIn("django_deploy_probes.E010", {message.id for message in messages})
 
+    @override_settings(DEPLOY_PROBES={"READY_CUSTOM_CHECKS": [123]})
+    def test_invalid_custom_check_entry_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E023", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"READY_CUSTOM_CHECKS": ["tests.missing.check"]})
+    def test_unimportable_custom_check_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E024", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CUSTOM_CHECKS": [
+                "tests.test_readyz.custom_true_check",
+                "tests.test_readyz.custom_true_check",
+            ]
+        }
+    )
+    def test_duplicate_custom_check_path_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E025", {message.id for message in messages})
+
     @override_settings(DEPLOY_PROBES={"REQUIRE_READY_CHECKS": True, "READY_CHECKS": []})
     def test_empty_required_ready_checks_are_reported(self):
         messages = run_checks()

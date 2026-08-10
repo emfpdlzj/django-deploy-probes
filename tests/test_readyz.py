@@ -914,3 +914,29 @@ class ReadyzTestCase(SimpleTestCase):
         self.assertEqual(payload["status"], "ready")
         self.assertEqual(payload["checks"]["database.default"]["status"], "ok")
         self.assertIsInstance(payload["checks"]["database.default"]["duration_ms"], float)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["database"],
+            "DATABASES": ["default", "replica"],
+            "INCLUDE_CHECK_DURATIONS": True,
+        }
+    )
+    def test_readyz_measures_each_database_alias_independently(self):
+        connections = {
+            "default": ConnectionMock(),
+            "replica": ConnectionMock(),
+        }
+
+        with (
+            mock.patch("django_deploy_probes.checks.database.connections", connections),
+            mock.patch(
+                "django_deploy_probes.checks.results.perf_counter",
+                side_effect=[10.0, 10.01, 20.0, 20.03],
+            ),
+        ):
+            response = self.client.get(reverse("django_deploy_probes:readyz"))
+
+        checks = response.json()["checks"]
+        self.assertEqual(checks["database.default"]["duration_ms"], 10.0)
+        self.assertEqual(checks["database.replica"]["duration_ms"], 30.0)

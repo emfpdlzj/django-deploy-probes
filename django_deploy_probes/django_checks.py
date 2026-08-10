@@ -2,6 +2,7 @@ from ipaddress import ip_network
 
 from django.core.checks import Error, Warning, register
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 from django_deploy_probes.checks.registry import BUILTIN_CHECKS
 from django_deploy_probes.checks.storage import VALID_STORAGE_CHECKS
@@ -99,7 +100,39 @@ def _check_custom_check_list(key, probes_settings):
                 id="django_deploy_probes.E010",
             )
         ]
-    return []
+    messages = []
+    seen = set()
+    for dotted_path in value:
+        if not isinstance(dotted_path, str) or not dotted_path:
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['{key}'] entries must be non-empty dotted paths.",
+                    id="django_deploy_probes.E023",
+                )
+            )
+            continue
+        if dotted_path in seen:
+            messages.append(
+                Error(
+                    f"Duplicate DEPLOY_PROBES['{key}'] custom check: {dotted_path}.",
+                    id="django_deploy_probes.E025",
+                )
+            )
+            continue
+        seen.add(dotted_path)
+        try:
+            custom_check = import_string(dotted_path)
+        except Exception:
+            custom_check = None
+        if not callable(custom_check):
+            messages.append(
+                Error(
+                    f"DEPLOY_PROBES['{key}'] custom check is not importable and callable: "
+                    f"{dotted_path}.",
+                    id="django_deploy_probes.E024",
+                )
+            )
+    return messages
 
 
 def _check_detail_level(probes_settings):

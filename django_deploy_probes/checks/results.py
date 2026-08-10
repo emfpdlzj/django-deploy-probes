@@ -67,7 +67,20 @@ def is_timeout_exception(exc):
     return False
 
 
-def with_duration(check_func, *args, include_duration=False, **kwargs):
+def run_check(check_func, *args, include_duration=False, **kwargs):
+    start = perf_counter()
+    result = check_func(*args, **kwargs)
+    if not include_duration:
+        return result
+
+    duration_ms = round((perf_counter() - start) * 1000, 3)
+    return {
+        **normalize_check_result(result),
+        "duration_ms": duration_ms,
+    }
+
+
+def run_named_checks(check_func, *args, include_duration=False, **kwargs):
     start = perf_counter()
     results = check_func(*args, **kwargs)
     if not include_duration:
