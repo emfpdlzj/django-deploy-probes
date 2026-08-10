@@ -2,7 +2,7 @@
 
 ## Questions
 
-Open a GitHub Discussion if discussions are enabled. Otherwise, open an issue with the `question` label.
+Open an issue with the `question` label.
 
 ## Bugs
 

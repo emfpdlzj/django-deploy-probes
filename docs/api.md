@@ -140,7 +140,8 @@ With `DETAIL_LEVEL="safe"`, failures include stable safe reasons:
 }
 ```
 
-With `INCLUDE_CHECK_DURATIONS=True`, every check is wrapped with `status` and `duration_ms`:
+With `INCLUDE_CHECK_DURATIONS=True`, every check is measured independently and wrapped with
+`status` and `duration_ms`:
 
 ```json
 {
@@ -239,3 +240,8 @@ When probes are accessed through a trusted reverse proxy, set `TRUSTED_PROXY_NET
 `CLIENT_IP_HEADER` so `INTERNAL_IP_ONLY` can evaluate the original client IP instead of the
 proxy hop. `X-Forwarded-For` is resolved by walking the proxy chain from right to left and
 selecting the last untrusted address as the client IP.
+
+Custom check entries are validated during Django system checks. Each entry must be a unique,
+importable dotted path that resolves to a callable. Runtime result names must also be unique;
+duplicates fail with the safe reason `duplicate_check_name` instead of overwriting an earlier
+result.

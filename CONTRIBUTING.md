@@ -8,7 +8,7 @@ and 6.0.
 ## Local setup
 
 ```bash
-uv sync --dev
+uv sync --all-extras --dev
 uv run pre-commit install
 uv run pre-commit run --all-files
 uv run pytest -q

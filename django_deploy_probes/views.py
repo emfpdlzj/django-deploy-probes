@@ -1,4 +1,5 @@
 from django.http import HttpResponseForbidden, JsonResponse
+from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET
 
 from django_deploy_probes.conf import get_deploy_probes_settings
@@ -8,6 +9,7 @@ from django_deploy_probes.security import security_forbidden_response
 
 
 @require_GET
+@never_cache
 def healthz(request):
     probes_settings = get_deploy_probes_settings()
     forbidden_response = security_forbidden_response(
@@ -23,6 +25,7 @@ def healthz(request):
 
 
 @require_GET
+@never_cache
 def readyz(request):
     probes_settings = get_deploy_probes_settings()
     forbidden_response = security_forbidden_response(request, probes_settings)
@@ -34,6 +37,7 @@ def readyz(request):
 
 
 @require_GET
+@never_cache
 def startupz(request):
     probes_settings = get_deploy_probes_settings()
     forbidden_response = security_forbidden_response(request, probes_settings)
@@ -45,6 +49,7 @@ def startupz(request):
 
 
 @require_GET
+@never_cache
 def version(request):
     probes_settings = get_deploy_probes_settings()
     forbidden_response = security_forbidden_response(request, probes_settings)

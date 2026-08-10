@@ -1,5 +1,25 @@
 # Changelog
 
+## v0.5.1
+
+Harden probe result accuracy, HTTP cache safety, configuration validation, and backend
+compatibility verification.
+
+### Highlights
+
+- Measure `duration_ms` independently for every database, Redis, storage, Celery, migration,
+  and custom check result instead of copying one batch duration to every result.
+- Mark every HTTP probe response, including forbidden responses, as non-cacheable.
+- Validate that custom check paths are unique, importable, and callable during Django system
+  checks.
+- Turn duplicate runtime result names into an explicit probe failure instead of silently
+  overwriting an earlier result.
+- Install all optional extras across the supported CI matrix and add real Django database,
+  filesystem storage, and Redis integration tests.
+- Add weekly dependency updates for uv and GitHub Actions.
+- Move the package maturity classifier from Alpha to Beta and align support guidance with the
+  repository's enabled communication channels.
+
 ## v0.5.0
 
 Make timeout behavior an explicit, backend-enforced contract.

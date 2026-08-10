@@ -164,7 +164,7 @@ With `DETAIL_LEVEL="safe"`, recognized timeout exceptions return
 ## Development
 
 ```bash
-uv sync --dev
+uv sync --all-extras --dev
 uv run pytest -q
 uv run mkdocs build --strict
 ```

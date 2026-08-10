@@ -21,7 +21,7 @@ class RegistryTestCase(SimpleTestCase):
     def test_builtin_and_custom_checks_include_durations_when_enabled(self):
         with mock.patch(
             "django_deploy_probes.checks.registry.check_databases",
-            return_value={"database.default": "ok"},
+            return_value={"database.default": {"status": "ok", "duration_ms": 1.0}},
         ):
             checks = run_configured_checks(
                 {
@@ -52,3 +52,27 @@ class RegistryTestCase(SimpleTestCase):
         )
 
         self.assertEqual(checks, {"external_api": "fail"})
+
+    def test_duplicate_result_names_fail_instead_of_overwriting(self):
+        checks = run_configured_checks(
+            {
+                "DETAIL_LEVEL": "safe",
+                "EXPOSE_CHECK_MESSAGES": False,
+                "INCLUDE_CHECK_DURATIONS": False,
+            },
+            [],
+            custom_check_paths=[
+                "tests.test_readyz.custom_true_check",
+                "tests.test_readyz.custom_true_check",
+            ],
+        )
+
+        self.assertEqual(
+            checks,
+            {
+                "custom_true_check": {
+                    "status": "fail",
+                    "reason": "duplicate_check_name",
+                }
+            },
+        )

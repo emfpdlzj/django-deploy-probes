@@ -24,7 +24,7 @@ class ImportUsageTestCase(SimpleTestCase):
         )
 
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.strip(), "0.5.0")
+        self.assertEqual(result.stdout.strip(), "0.5.1")
 
     def test_package_root_keeps_view_imports_out_of_public_exports(self):
         import django_deploy_probes

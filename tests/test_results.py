@@ -7,7 +7,8 @@ from django_deploy_probes.checks.results import (
     failure_result_for_exception,
     is_timeout_exception,
     normalize_check_result,
-    with_duration,
+    run_check,
+    run_named_checks,
 )
 
 
@@ -30,12 +31,27 @@ class ResultsTestCase(SimpleTestCase):
             {"status": "fail", "message": "timeout"},
         )
 
-    def test_with_duration_adds_normalized_duration_metadata(self):
+    def test_run_check_adds_normalized_duration_metadata(self):
         with mock.patch(
             "django_deploy_probes.checks.results.perf_counter",
             side_effect=[10.0, 10.01234],
         ):
-            results = with_duration(
+            result = run_check(
+                lambda: {"message": "timeout"},
+                include_duration=True,
+            )
+
+        self.assertEqual(
+            result,
+            {"status": "fail", "message": "timeout", "duration_ms": 12.34},
+        )
+
+    def test_run_named_checks_times_one_custom_check_execution(self):
+        with mock.patch(
+            "django_deploy_probes.checks.results.perf_counter",
+            side_effect=[10.0, 10.01234],
+        ):
+            results = run_named_checks(
                 lambda: {
                     "database.default": "ok",
                     "external_api": {"message": "timeout"},
@@ -55,10 +71,10 @@ class ResultsTestCase(SimpleTestCase):
             },
         )
 
-    def test_with_duration_returns_raw_results_when_disabled(self):
-        results = with_duration(lambda: {"database.default": "ok"}, include_duration=False)
+    def test_run_check_returns_raw_result_when_disabled(self):
+        result = run_check(lambda: "ok", include_duration=False)
 
-        self.assertEqual(results, {"database.default": "ok"})
+        self.assertEqual(result, "ok")
 
     def test_timeout_detection_supports_builtin_and_backend_exceptions(self):
         self.assertTrue(is_timeout_exception(TimeoutError()))

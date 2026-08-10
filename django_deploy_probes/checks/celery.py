@@ -2,6 +2,7 @@ from django_deploy_probes.checks.results import (
     failure_result,
     failure_result_for_exception,
     is_timeout_exception,
+    run_check,
 )
 
 
@@ -30,8 +31,32 @@ def _check_result_backend(app):
     app.backend.get(RESULT_BACKEND_PROBE_KEY)
 
 
-def check_celery(celery_settings, detail_level="none"):
+def _check_celery_operation(
+    app,
+    app_failure_reason,
+    operation,
+    timeout,
+    fallback_reason,
+    detail_level,
+):
+    if app_failure_reason is not None:
+        return failure_result(app_failure_reason, detail_level)
+
+    try:
+        operation(app, timeout)
+    except Exception as exc:
+        return failure_result_for_exception(exc, fallback_reason, detail_level)
+    return "ok"
+
+
+def _check_result_backend_with_timeout(app, timeout):
+    del timeout
+    _check_result_backend(app)
+
+
+def check_celery(celery_settings, detail_level="none", include_duration=False):
     results = {}
+    timeout = celery_settings.get("TIMEOUT", 1.0)
     try:
         app = _get_celery_app()
     except ImportError:
@@ -44,57 +69,39 @@ def check_celery(celery_settings, detail_level="none"):
         app_failure_reason = None
 
     if celery_settings.get("BROKER"):
-        check_name = "celery.broker"
-        try:
-            if app is None:
-                raise RuntimeError("celery app is unavailable")
-            _check_broker(app, celery_settings.get("TIMEOUT", 1.0))
-        except Exception as exc:
-            if app_failure_reason is not None:
-                results[check_name] = failure_result(app_failure_reason, detail_level)
-            else:
-                results[check_name] = failure_result_for_exception(
-                    exc,
-                    "broker_unavailable",
-                    detail_level,
-                )
-        else:
-            results[check_name] = "ok"
+        results["celery.broker"] = run_check(
+            _check_celery_operation,
+            app,
+            app_failure_reason,
+            _check_broker,
+            timeout,
+            "broker_unavailable",
+            detail_level,
+            include_duration=include_duration,
+        )
 
     if celery_settings.get("WORKERS"):
-        check_name = "celery.workers"
-        try:
-            if app is None:
-                raise RuntimeError("celery app is unavailable")
-            _check_workers(app, celery_settings.get("TIMEOUT", 1.0))
-        except Exception as exc:
-            if app_failure_reason is not None:
-                results[check_name] = failure_result(app_failure_reason, detail_level)
-            else:
-                results[check_name] = failure_result_for_exception(
-                    exc,
-                    "workers_unavailable",
-                    detail_level,
-                )
-        else:
-            results[check_name] = "ok"
+        results["celery.workers"] = run_check(
+            _check_celery_operation,
+            app,
+            app_failure_reason,
+            _check_workers,
+            timeout,
+            "workers_unavailable",
+            detail_level,
+            include_duration=include_duration,
+        )
 
     if celery_settings.get("RESULT_BACKEND"):
-        check_name = "celery.result_backend"
-        try:
-            if app is None:
-                raise RuntimeError("celery app is unavailable")
-            _check_result_backend(app)
-        except Exception as exc:
-            if app_failure_reason is not None:
-                results[check_name] = failure_result(app_failure_reason, detail_level)
-            else:
-                results[check_name] = failure_result_for_exception(
-                    exc,
-                    "result_backend_unavailable",
-                    detail_level,
-                )
-        else:
-            results[check_name] = "ok"
+        results["celery.result_backend"] = run_check(
+            _check_celery_operation,
+            app,
+            app_failure_reason,
+            _check_result_backend_with_timeout,
+            timeout,
+            "result_backend_unavailable",
+            detail_level,
+            include_duration=include_duration,
+        )
 
     return results
