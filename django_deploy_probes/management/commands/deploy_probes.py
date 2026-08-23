@@ -1,14 +1,14 @@
 import json
+from typing import ClassVar
 
-from django.core.management.base import BaseCommand
-from django.core.management.base import SystemCheckError
+from django.core.management.base import BaseCommand, SystemCheckError
 
 from django_deploy_probes.probes import PROBE_NAMES, run_probe
 
 
 class Command(BaseCommand):
     help = "Run deploy probes from the command line."
-    requires_system_checks = []
+    requires_system_checks: ClassVar[list] = []
 
     def add_arguments(self, parser):
         parser.add_argument(

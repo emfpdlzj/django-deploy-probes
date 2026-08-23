@@ -6,7 +6,6 @@ from django_deploy_probes.checks.redis import check_redis
 from django_deploy_probes.checks.results import failure_result, run_check
 from django_deploy_probes.checks.storage import check_storage
 
-
 BUILTIN_CHECKS = {
     "database": lambda probes_settings: (
         check_databases,

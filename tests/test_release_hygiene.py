@@ -4,7 +4,6 @@ from django.test import SimpleTestCase
 
 from django_deploy_probes import __version__
 
-
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 
 

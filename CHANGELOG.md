@@ -1,5 +1,38 @@
 # Changelog
 
+## v0.6.0
+
+Strengthen production confidence with stricter configuration validation, real backend integration
+coverage, current runtime support, and deployment-focused operations documentation.
+
+### Highlights
+
+- Validate probe settings with the same recursive merge used at runtime and reject invalid or
+  duplicate checks, aliases, metadata, boolean flags, header-token options, and OpenAPI setup.
+- Reject Celery readiness configurations that enable no broker, worker, or result-backend operation.
+- Treat configured custom readiness and startup checks as satisfying the corresponding
+  `REQUIRE_*_CHECKS` setting.
+- Exercise database and migration probes against PostgreSQL, storage probes against MinIO through
+  Django's S3 storage backend, and Celery broker and result-backend probes against Redis in CI.
+- Add Django 6.1 support while retaining Django 5.2 LTS and 6.0 coverage across their supported
+  Python versions.
+- Enforce a 90% coverage floor, define stable Ruff rule selection, group dependency updates, and
+  update GitHub Actions and locked dependencies.
+- Add a production operations guide, failure-drill checklist, contributor guide, and an expanded
+  comparison with other Django health-check packages.
+
+### Upgrade notes
+
+- Existing valid endpoint payloads, HTTP status codes, management-command exit codes, and setting
+  defaults are unchanged.
+- `python manage.py check` and `python manage.py deploy_probes ...` now reject configurations that
+  were already invalid but could previously reach runtime. Fix reported aliases and types before
+  deployment.
+- When `ENABLE_OPENAPI=True`, install the `openapi` extra so Django REST Framework and
+  drf-spectacular are available.
+- When `celery` appears in `READY_CHECKS` or `STARTUP_CHECKS`, enable at least one of `BROKER`,
+  `WORKERS`, or `RESULT_BACKEND`.
+
 ## v0.5.1
 
 Harden probe result accuracy, HTTP cache safety, configuration validation, and backend

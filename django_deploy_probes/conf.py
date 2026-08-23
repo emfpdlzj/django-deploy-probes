@@ -2,7 +2,6 @@ from copy import deepcopy
 
 from django.conf import settings
 
-
 DEFAULT_DEPLOY_PROBES = {
     "SERVICE_NAME": "django-app",
     "ENVIRONMENT": "local",
@@ -61,6 +60,10 @@ def _merge_settings(defaults, configured):
     return merged
 
 
+def merge_deploy_probes_settings(configured):
+    return _merge_settings(DEFAULT_DEPLOY_PROBES, configured)
+
+
 def get_deploy_probes_settings():
     configured = getattr(settings, "DEPLOY_PROBES", {})
-    return _merge_settings(DEFAULT_DEPLOY_PROBES, configured)
+    return merge_deploy_probes_settings(configured)

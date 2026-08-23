@@ -1,3 +1,5 @@
+from unittest import mock
+
 from django.core.checks import run_checks
 from django.test import SimpleTestCase, override_settings
 
@@ -27,8 +29,38 @@ class DjangoChecksTestCase(SimpleTestCase):
 
         self.assertIn("django_deploy_probes.E003", {message.id for message in messages})
 
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": [123]})
+    def test_invalid_ready_check_entry_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E003", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["database", "database"]})
+    def test_duplicate_ready_check_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E026", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"INCLUDE_CHECK_DURATIONS": "yes"})
+    def test_invalid_boolean_setting_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E027", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"SERVICE_NAME": 123})
+    def test_invalid_metadata_setting_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E039", {message.id for message in messages})
+
     @override_settings(DEPLOY_PROBES={"INTERNAL_IP_NETWORKS": ["not-a-cidr"]})
     def test_invalid_internal_network_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E005", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"INTERNAL_IP_NETWORKS": [None]})
+    def test_invalid_internal_network_type_is_reported(self):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E005", {message.id for message in messages})
@@ -68,6 +100,20 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E006", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "HEADER_TOKEN_VALIDATION": {
+                "TOKEN": "secret",
+                "HEADER_NAME": "",
+                "PROTECT_HEALTHZ": "yes",
+            }
+        }
+    )
+    def test_invalid_header_token_options_are_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E038", {message.id for message in messages})
 
     @override_settings(DEPLOY_PROBES={"READY_CUSTOM_CHECKS": "tests.checks.ready"})
     def test_invalid_custom_check_list_is_reported(self):
@@ -112,6 +158,46 @@ class DjangoChecksTestCase(SimpleTestCase):
 
         self.assertIn("django_deploy_probes.W003", {message.id for message in messages})
 
+    @override_settings(
+        DEPLOY_PROBES={
+            "REQUIRE_READY_CHECKS": True,
+            "READY_CUSTOM_CHECKS": ["tests.test_readyz.custom_true_check"],
+        }
+    )
+    def test_custom_check_satisfies_required_ready_check(self):
+        messages = run_checks()
+
+        self.assertNotIn("django_deploy_probes.W002", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["database"], "DATABASES": []})
+    def test_missing_database_aliases_are_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E028", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["database"], "DATABASES": ["missing"]})
+    def test_unknown_database_alias_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E029", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"STARTUP_CHECKS": ["migrations"], "MIGRATIONS": "invalid"})
+    def test_invalid_migration_config_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E030", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "STARTUP_CHECKS": ["migrations"],
+            "MIGRATIONS": {"DATABASE": "missing"},
+        }
+    )
+    def test_unknown_migration_database_alias_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E032", {message.id for message in messages})
+
     @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["redis"], "REDIS": {}})
     def test_missing_redis_config_is_reported(self):
         messages = run_checks()
@@ -128,6 +214,17 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E009", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["redis"],
+            "REDIS": {1: {"LOCATION": "redis://localhost:6379/0"}},
+        }
+    )
+    def test_invalid_redis_alias_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E037", {message.id for message in messages})
 
     @override_settings(DEPLOY_PROBES={"READY_CHECKS": ["storage"], "STORAGE": {}})
     def test_missing_storage_config_is_reported(self):
@@ -180,6 +277,17 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E014", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["storage"],
+            "STORAGE": {"missing": {"CHECK": "write"}},
+        }
+    )
+    def test_unknown_storage_alias_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E036", {message.id for message in messages})
 
     @override_settings(
         DEPLOY_PROBES={
@@ -245,3 +353,45 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E022", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["celery"],
+            "CELERY": {"BROKER": True},
+        }
+    )
+    def test_partial_celery_settings_are_merged_with_defaults(self):
+        messages = run_checks()
+        message_ids = {message.id for message in messages}
+
+        self.assertNotIn("django_deploy_probes.E033", message_ids)
+        self.assertNotIn("django_deploy_probes.E034", message_ids)
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["celery"],
+            "CELERY": {"BROKER": False, "WORKERS": False, "RESULT_BACKEND": False},
+        }
+    )
+    def test_empty_celery_operations_are_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E034", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "READY_CHECKS": ["celery"],
+            "CELERY": {"BROKER": "yes"},
+        }
+    )
+    def test_invalid_celery_operation_flag_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E033", {message.id for message in messages})
+
+    @override_settings(DEPLOY_PROBES={"ENABLE_OPENAPI": True})
+    def test_missing_openapi_dependencies_are_reported(self):
+        with mock.patch("django_deploy_probes.django_checks.find_spec", return_value=None):
+            messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E035", {message.id for message in messages})

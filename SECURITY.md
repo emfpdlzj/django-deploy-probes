@@ -4,7 +4,8 @@
 
 | Release | Python | Django | Security support |
 | --- | --- | --- | --- |
-| 0.5.x | 3.10–3.14 | 5.2 LTS, 6.0 | Supported |
+| 0.6.x | 3.10–3.14 | 5.2 LTS, 6.0, 6.1 | Supported |
+| 0.5.x | 3.10–3.14 | 5.2 LTS, 6.0 | Ended |
 | 0.4.x | 3.10–3.14 | 5.2 LTS, 6.0 | Ended |
 | 0.3.x | 3.9–3.14 | 4.2–5.2 | Ended |
 

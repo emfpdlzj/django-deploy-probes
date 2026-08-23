@@ -9,7 +9,6 @@ from django_deploy_probes.checks.results import (
     run_check,
 )
 
-
 VALID_STORAGE_CHECKS = {"exists", "write"}
 DEFAULT_WRITE_PREFIX = "django-deploy-probes"
 

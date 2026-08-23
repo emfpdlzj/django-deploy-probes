@@ -32,15 +32,21 @@ jobs:
             django-version: "6.0.*"
           - python-version: "3.14"
             django-version: "6.0.*"
+          - python-version: "3.12"
+            django-version: "6.1.*"
+          - python-version: "3.13"
+            django-version: "6.1.*"
+          - python-version: "3.14"
+            django-version: "6.1.*"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v9.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -59,12 +65,12 @@ jobs:
         run: uv run python -Wd -m pytest -q --cov --cov-report=term-missing --cov-report=xml
 
       - name: Build docs
-        if: matrix.python-version == '3.13' && matrix.django-version == '6.0.*'
+        if: matrix.python-version == '3.13' && matrix.django-version == '6.1.*'
         run: uv run mkdocs build --strict
 
       - name: Upload coverage to Codecov
-        if: matrix.python-version == '3.13' && matrix.django-version == '6.0.*' && env.CODECOV_TOKEN != ''
-        uses: codecov/codecov-action@v5
+        if: matrix.python-version == '3.13' && matrix.django-version == '6.1.*' && env.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v7
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
@@ -77,10 +83,23 @@ jobs:
         run: uv build
 
   integration:
-    name: Django backend integration
+    name: Production backend integration
     runs-on: ubuntu-latest
 
     services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: deploy_probes
+          POSTGRES_USER: postgres
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d deploy_probes"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
       redis:
         image: redis:7-alpine
         ports:
@@ -92,21 +111,48 @@ jobs:
           --health-retries 5
 
     env:
+      DEPLOY_PROBES_POSTGRES_HOST: localhost
+      DEPLOY_PROBES_POSTGRES_PORT: "5432"
+      DEPLOY_PROBES_POSTGRES_DB: deploy_probes
+      DEPLOY_PROBES_POSTGRES_USER: postgres
       DEPLOY_PROBES_REDIS_URL: redis://localhost:6379/0
+      DEPLOY_PROBES_S3_ENDPOINT: http://localhost:9000
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v9.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
       - name: Install dependencies
-        run: uv sync --all-extras --dev
+        run: uv sync --all-extras --dev --group integration
+
+      - name: Create S3 test credentials
+        run: |
+          echo "DEPLOY_PROBES_S3_ACCESS_KEY=integration" >> "$GITHUB_ENV"
+          echo "DEPLOY_PROBES_S3_SECRET_KEY=$(openssl rand -hex 16)" >> "$GITHUB_ENV"
+
+      - name: Start S3-compatible storage
+        run: |
+          docker run --detach --name deploy-probes-minio \
+            --publish 9000:9000 \
+            --env MINIO_ROOT_USER="$DEPLOY_PROBES_S3_ACCESS_KEY" \
+            --env MINIO_ROOT_PASSWORD="$DEPLOY_PROBES_S3_SECRET_KEY" \
+            minio/minio:RELEASE.2025-04-22T22-12-26Z \
+            server /data
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:9000/minio/health/live; then
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs deploy-probes-minio
+          exit 1
 
       - name: Run backend integration tests
         run: uv run pytest -q tests/test_integrations.py

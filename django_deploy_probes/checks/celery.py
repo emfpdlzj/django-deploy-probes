@@ -5,7 +5,6 @@ from django_deploy_probes.checks.results import (
     run_check,
 )
 
-
 RESULT_BACKEND_PROBE_KEY = "django-deploy-probes-readyz"
 
 
