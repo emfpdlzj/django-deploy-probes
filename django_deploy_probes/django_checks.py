@@ -9,7 +9,6 @@ from django_deploy_probes.checks.registry import BUILTIN_CHECKS
 from django_deploy_probes.checks.storage import VALID_STORAGE_CHECKS
 from django_deploy_probes.conf import DEFAULT_DEPLOY_PROBES, merge_deploy_probes_settings
 
-
 VALID_DETAIL_LEVELS = {"none", "safe"}
 REMOVED_SETTINGS = {"TIMEOUT"}
 BOOLEAN_SETTINGS = {

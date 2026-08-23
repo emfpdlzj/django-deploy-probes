@@ -1,6 +1,5 @@
 from time import perf_counter
 
-
 TIMEOUT_EXCEPTION_NAMES = {
     "ConnectTimeout",
     "ConnectTimeoutError",

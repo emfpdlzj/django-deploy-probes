@@ -4,6 +4,7 @@ __pycache__/
 *.py[cod]
 .coverage
 .DS_Store
+Icon?
 AGENTS.md
 .idea/
 .mypy_cache/
@@ -11,6 +12,7 @@ AGENTS.md
 build/
 dist/
 htmlcov/
+coverage.xml
 site/
 *.egg-info/
 .agents/*

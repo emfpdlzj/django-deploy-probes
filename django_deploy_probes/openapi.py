@@ -1,6 +1,5 @@
 from django_deploy_probes.conf import get_deploy_probes_settings
 
-
 HEALTHZ_SCHEMA = {
     "type": "object",
     "properties": {
@@ -161,8 +160,8 @@ def apply_openapi_metadata(view_name, view):
         return view
 
     try:
-        from rest_framework.decorators import api_view
         from drf_spectacular.utils import OpenApiResponse, extend_schema
+        from rest_framework.decorators import api_view
     except ImportError:
         return view
 

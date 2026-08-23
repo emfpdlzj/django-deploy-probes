@@ -2,7 +2,6 @@ from copy import deepcopy
 
 from django.conf import settings
 
-
 DEFAULT_DEPLOY_PROBES = {
     "SERVICE_NAME": "django-app",
     "ENVIRONMENT": "local",

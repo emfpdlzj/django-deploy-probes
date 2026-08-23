@@ -7,7 +7,7 @@ Use `django-deploy-probes` for CI/CD deployment validation, Docker health checks
 [![PyPI](https://img.shields.io/pypi/v/django-deploy-probes.svg?label=PyPI)](https://pypi.org/project/django-deploy-probes/)
 [![Django Packages](https://img.shields.io/badge/Django%20Packages-django--deploy--probes-0c4b33.svg)](https://djangopackages.org/packages/p/django-deploy-probes/)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB.svg)](https://www.python.org/)
-[![Django](https://img.shields.io/badge/django-5.2%20%7C%206.0-0C4B33.svg)](https://www.djangoproject.com/)
+[![Django](https://img.shields.io/badge/django-5.2%20%7C%206.0%20%7C%206.1-0C4B33.svg)](https://www.djangoproject.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![uv](https://img.shields.io/badge/package%20manager-uv-5C3EE8.svg)](https://docs.astral.sh/uv/)
 
@@ -31,7 +31,7 @@ pip install django-deploy-probes
 Supported runtimes:
 
 - Python 3.10 through 3.14
-- Django 5.2 LTS and Django 6.0
+- Django 5.2 LTS, Django 6.0, and Django 6.1
 
 The `0.3.x` release line remains available for projects that still require Django 4.2.
 

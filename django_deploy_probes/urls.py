@@ -2,7 +2,6 @@ from django.urls import path
 
 from django_deploy_probes.views import healthz, readyz, startupz, version
 
-
 app_name = "django_deploy_probes"
 
 urlpatterns = [

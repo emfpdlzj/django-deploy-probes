@@ -2,8 +2,8 @@
 
 Thanks for helping improve `django-deploy-probes`.
 
-The current development branch targets Python 3.10 through 3.14 and Django 5.2 LTS
-and 6.0.
+The current development branch targets Python 3.10 through 3.14 and Django 5.2 LTS,
+6.0, and 6.1.
 
 ## Local setup
 

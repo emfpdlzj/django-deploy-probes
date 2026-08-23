@@ -1,6 +1,5 @@
 import os
 
-
 SECRET_KEY = "test-secret-key"
 ROOT_URLCONF = "tests.urls"
 INSTALLED_APPS = [

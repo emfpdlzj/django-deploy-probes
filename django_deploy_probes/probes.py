@@ -4,7 +4,6 @@ from django_deploy_probes.checks.registry import run_configured_checks
 from django_deploy_probes.checks.results import check_is_ok
 from django_deploy_probes.conf import get_deploy_probes_settings
 
-
 PROBE_NAMES = ("healthz", "readyz", "startupz", "version")
 
 
