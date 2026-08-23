@@ -80,6 +80,10 @@ dev = [
     "pytest>=8.0",
     "ruff>=0.6",
 ]
+integration = [
+    "django-storages[s3]>=1.14",
+    "psycopg[binary]>=3.2",
+]
 
 [tool.ruff]
 line-length = 100
