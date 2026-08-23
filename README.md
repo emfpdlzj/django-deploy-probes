@@ -17,6 +17,8 @@ Use `django-deploy-probes` for CI/CD deployment validation, Docker health checks
 - [Basic setup](docs/basic.md)
 - [Endpoint reference](docs/api.md)
 - [Security options](docs/security.md)
+- [Production operations guide](docs/operations.md)
+- [Comparison with other Django health check packages](docs/comparison.md)
 - [Docker integration](docs/docker.md)
 - [Docker Compose integration](docs/docker-compose.md)
 - [Kubernetes probes](docs/kubernetes.md)
@@ -170,3 +172,6 @@ uv run mkdocs build --strict
 ```
 
 Publishing is handled by `.github/workflows/publish.yml` when a GitHub release is published. Documentation is deployed to GitHub Pages from `main` by `.github/workflows/docs.yml`.
+
+See the [contributing guide](docs/contributing.md) for suitable contribution areas, test levels,
+and compatibility rules.

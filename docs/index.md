@@ -22,7 +22,7 @@ pip install django-deploy-probes
 Supported runtimes:
 
 - Python 3.10 through 3.14
-- Django 5.2 LTS and Django 6.0
+- Django 5.2 LTS, Django 6.0, and Django 6.1
 
 Use the `0.3.x` release line for projects that still require Django 4.2.
 
@@ -70,6 +70,8 @@ curl -f http://localhost:8000/version
 - [Basic setup](basic.md)
 - [Endpoint reference](api.md)
 - [Security options](security.md)
+- [Production operations](operations.md)
+- [Package comparison](comparison.md)
 - [Docker integration](docker.md)
 - [Kubernetes probes](kubernetes.md)
 - [GitHub Actions deployment validation](recipes/github-actions.md)

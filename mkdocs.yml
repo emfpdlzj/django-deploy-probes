@@ -39,8 +39,10 @@ nav:
       - Endpoint Reference: api.md
       - Configuration and Security: security.md
       - OpenAPI: openapi.md
-      - Comparison with django-probes: comparison.md
+      - Package Comparison: comparison.md
+      - Contributing: contributing.md
   - Deployment Guides:
+      - Production Operations: operations.md
       - Docker: docker.md
       - Docker Compose: docker-compose.md
       - Kubernetes: kubernetes.md
