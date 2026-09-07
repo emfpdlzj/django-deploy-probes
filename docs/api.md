@@ -97,6 +97,7 @@ DEPLOY_PROBES = {
     "MIGRATIONS": {
         "DATABASE": "default",
     },
+    "CUSTOM_CHECKS": [],
     "READY_CUSTOM_CHECKS": [],
     "STARTUP_CUSTOM_CHECKS": [],
     "DETAIL_LEVEL": "none",
@@ -111,11 +112,14 @@ DEPLOY_PROBES = {
         "127.0.0.1/32",
         "::1/128",
         "10.0.0.0/8",
+        "172.16.0.0/12",
+        "192.168.0.0/16",
     ],
     "TRUSTED_PROXY_NETWORKS": [],
     "CLIENT_IP_HEADER": None,
     "HEADER_TOKEN_VALIDATION": False,
     "ENABLE_OPENAPI": False,
+    "OPENAPI_TAG": "Deployment Probes",
 }
 ```
 

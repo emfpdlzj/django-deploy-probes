@@ -45,8 +45,9 @@ monitoring.
 Choose [django-alive](https://github.com/lincolnloop/django-alive) when two lightweight alive and
 health endpoints, plus a small custom-check interface, cover your deployment.
 
-Choose [django-probes](https://github.com/botify-labs/django-probes) when a startup script or init
-container needs to wait for a database or another service and HTTP routing probes are unnecessary.
+Choose [django-probes](https://github.com/painless-software/django-probes) when a startup script or
+init container needs to wait for a database or another service and HTTP routing probes are
+unnecessary.
 
 These packages can coexist when the consumers are different. For example, an orchestrator can use
 `django-deploy-probes` for traffic decisions while an internal monitoring system uses a richer

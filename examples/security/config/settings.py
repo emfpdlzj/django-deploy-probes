@@ -28,7 +28,7 @@ DATABASES = {
 DEPLOY_PROBES = {
     "SERVICE_NAME": "security-example",
     "ENVIRONMENT": "local",
-    "VERSION": "0.1.0",
+    "VERSION": "1.2.3",
     "COMMIT": "local",
     "BRANCH": "main",
     "BUILD_TIME": "2026-05-17T00:00:00+09:00",

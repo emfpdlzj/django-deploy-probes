@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: registry.example.com/my-django-app:0.6.0
+          image: registry.example.com/my-django-app:1.2.3
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8000
@@ -27,7 +27,7 @@ spec:
             - name: DJANGO_ENV
               value: prod
             - name: APP_VERSION
-              value: 0.6.0
+              value: 1.2.3
             - name: GIT_COMMIT
               value: a1b2c3d
             - name: GIT_BRANCH
