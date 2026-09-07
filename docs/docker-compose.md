@@ -53,7 +53,7 @@ services:
       - "8000:8000"
     environment:
       DJANGO_ENV: prod
-      APP_VERSION: 0.6.0
+      APP_VERSION: 1.2.3
       GIT_COMMIT: local
       GIT_BRANCH: main
       BUILD_TIME: "2026-05-17T00:00:00+09:00"
@@ -69,7 +69,7 @@ services:
       retries: 3
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s

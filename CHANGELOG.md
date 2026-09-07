@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.6.1
+
+Refresh dependencies and deployment documentation while preserving the existing public API.
+
+### Highlights
+
+- Refresh locked Python dependencies, including security fixes for `sqlparse` and
+  `pymdown-extensions`.
+- Verify Redis and Celery integrations against Redis 8 and update the Docker Compose examples to
+  use Redis 8.
+- Upgrade `setup-uv` to v10 across CI, documentation, security, and publishing workflows.
+- Correct the configuration reference, comparison links, historical changelog entries, and
+  version metadata used by runnable examples.
+- Bring the Korean, Japanese, and Simplified Chinese guides in line with the current runtime,
+  extras, CLI, storage, startup, and security documentation.
+
+### Upgrade notes
+
+- Endpoint URLs, payloads, settings, and management-command behavior are unchanged.
+- Applications using the Redis extra can continue to connect to supported Redis 7 servers; Redis
+  8 is now the version exercised by the project integration suite and Docker Compose example.
+
 ## v0.6.0
 
 Strengthen production confidence with stricter configuration validation, real backend integration
@@ -161,7 +183,6 @@ This release is focused on deployment validation workflows such as blue/green de
 - Add `readyz` endpoint for traffic readiness checks.
 - Add `startupz` endpoint for startup/bootstrap checks.
 - Add `version` endpoint for deployed application metadata.
-- Add builtin `storage` checks for Django storage aliases, including S3-style backends.
 - Support both include-style and import-style Django URL configuration.
 - Support optional readiness checks for Django databases, Redis, Celery, migrations, and custom checks.
 - Add optional package extras for Redis and Celery integrations.
