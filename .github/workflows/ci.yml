@@ -137,22 +137,18 @@ jobs:
           echo "DEPLOY_PROBES_S3_ACCESS_KEY=integration" >> "$GITHUB_ENV"
           echo "DEPLOY_PROBES_S3_SECRET_KEY=$(openssl rand -hex 16)" >> "$GITHUB_ENV"
 
-      - name: Start S3-compatible storage
+      - name: Run backend integration tests
         run: |
-          docker run --detach --name deploy-probes-minio \
-            --publish 9000:9000 \
-            --env MINIO_ROOT_USER="$DEPLOY_PROBES_S3_ACCESS_KEY" \
-            --env MINIO_ROOT_PASSWORD="$DEPLOY_PROBES_S3_SECRET_KEY" \
-            minio/minio:RELEASE.2025-04-22T22-12-26Z \
-            server /data
+          uvx --python 3.13 --from 'moto[server]==5.2.3' moto_server \
+            -H 127.0.0.1 -p 9000 >"$RUNNER_TEMP/moto-server.log" 2>&1 &
+          MOTO_PID=$!
+          trap 'kill "$MOTO_PID" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
-            if curl --fail --silent http://localhost:9000/minio/health/live; then
-              exit 0
+            if curl --fail --silent http://localhost:9000/ >/dev/null; then
+              uv run pytest -q tests/test_integrations.py
+              exit $?
             fi
             sleep 1
           done
-          docker logs deploy-probes-minio
+          cat "$RUNNER_TEMP/moto-server.log"
           exit 1
-
-      - name: Run backend integration tests
-        run: uv run pytest -q tests/test_integrations.py

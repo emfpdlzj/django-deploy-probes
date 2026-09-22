@@ -144,6 +144,6 @@ Record the expected status code, maximum response time, and rollback action for 
 ## Verified Backends
 
 The project CI runs the probe code against PostgreSQL, Redis, a Redis-backed Celery broker and
-result backend, filesystem storage, and MinIO as an S3-compatible Django storage backend. Unit tests
+result backend, filesystem storage, and Moto as an S3-compatible Django storage backend. Unit tests
 cover failure normalization, proxy handling, response contracts, and configuration errors across
 the supported Python and Django matrix.

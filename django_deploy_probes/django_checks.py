@@ -55,6 +55,7 @@ def check_deploy_probes_settings(app_configs, **kwargs):
     messages.extend(_check_custom_check_list("CUSTOM_CHECKS", merged))
     messages.extend(_check_custom_check_list("READY_CUSTOM_CHECKS", merged))
     messages.extend(_check_custom_check_list("STARTUP_CUSTOM_CHECKS", merged))
+    messages.extend(_check_ready_custom_check_overlap(merged))
     messages.extend(_check_boolean_settings(merged))
     messages.extend(_check_metadata_settings(merged))
     messages.extend(_check_detail_level(merged))
@@ -177,6 +178,25 @@ def _check_custom_check_list(key, probes_settings):
                 )
             )
     return messages
+
+
+def _check_ready_custom_check_overlap(probes_settings):
+    legacy_paths = probes_settings.get("CUSTOM_CHECKS")
+    ready_paths = probes_settings.get("READY_CUSTOM_CHECKS")
+    if not isinstance(legacy_paths, (list, tuple)) or not isinstance(ready_paths, (list, tuple)):
+        return []
+
+    legacy_path_set = {path for path in legacy_paths if isinstance(path, str)}
+    ready_path_set = {path for path in ready_paths if isinstance(path, str)}
+    overlapping_paths = sorted(legacy_path_set & ready_path_set)
+    return [
+        Error(
+            "Custom check is configured in both DEPLOY_PROBES['CUSTOM_CHECKS'] and "
+            f"DEPLOY_PROBES['READY_CUSTOM_CHECKS']: {dotted_path}.",
+            id="django_deploy_probes.E041",
+        )
+        for dotted_path in overlapping_paths
+    ]
 
 
 def _check_detail_level(probes_settings):
@@ -307,7 +327,7 @@ def _check_header_token(probes_settings):
         messages.append(
             Error(
                 "DEPLOY_PROBES['HEADER_TOKEN_VALIDATION']['PROTECT_HEALTHZ'] must be a boolean.",
-                id="django_deploy_probes.E038",
+                id="django_deploy_probes.E040",
             )
         )
     return messages
