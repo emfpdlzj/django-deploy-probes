@@ -113,7 +113,9 @@ class DjangoChecksTestCase(SimpleTestCase):
     def test_invalid_header_token_options_are_reported(self):
         messages = run_checks()
 
-        self.assertIn("django_deploy_probes.E038", {message.id for message in messages})
+        message_ids = {message.id for message in messages}
+        self.assertIn("django_deploy_probes.E038", message_ids)
+        self.assertIn("django_deploy_probes.E040", message_ids)
 
     @override_settings(DEPLOY_PROBES={"READY_CUSTOM_CHECKS": "tests.checks.ready"})
     def test_invalid_custom_check_list_is_reported(self):
@@ -145,6 +147,28 @@ class DjangoChecksTestCase(SimpleTestCase):
         messages = run_checks()
 
         self.assertIn("django_deploy_probes.E025", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "CUSTOM_CHECKS": ["tests.test_readyz.custom_true_check"],
+            "READY_CUSTOM_CHECKS": ["tests.test_readyz.custom_true_check"],
+        }
+    )
+    def test_custom_check_path_shared_by_legacy_and_ready_settings_is_reported(self):
+        messages = run_checks()
+
+        self.assertIn("django_deploy_probes.E041", {message.id for message in messages})
+
+    @override_settings(
+        DEPLOY_PROBES={
+            "CUSTOM_CHECKS": ["tests.test_readyz.custom_true_check"],
+            "STARTUP_CUSTOM_CHECKS": ["tests.test_readyz.custom_true_check"],
+        }
+    )
+    def test_legacy_and_startup_custom_check_paths_can_overlap(self):
+        messages = run_checks()
+
+        self.assertNotIn("django_deploy_probes.E041", {message.id for message in messages})
 
     @override_settings(DEPLOY_PROBES={"REQUIRE_READY_CHECKS": True, "READY_CHECKS": []})
     def test_empty_required_ready_checks_are_reported(self):

@@ -24,8 +24,31 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Verify release tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          PACKAGE_VERSION=$(python - <<'PY'
+          from pathlib import Path
+          import re
+
+          content = Path("django_deploy_probes/__init__.py").read_text()
+          match = re.search(r'__version__ = "([^"]+)"', content)
+          if not match:
+              raise SystemExit("Could not find __version__ in django_deploy_probes/__init__.py")
+          print(match.group(1))
+          PY
+          )
+          if [ "$RELEASE_TAG" != "v$PACKAGE_VERSION" ]; then
+            echo "Release tag $RELEASE_TAG does not match package version v$PACKAGE_VERSION."
+            exit 1
+          fi
+
       - name: Build
         run: uv build
+
+      - name: Validate distribution metadata
+        run: uvx --python 3.12 --from 'twine>=6.2' twine check dist/*
 
       - name: Smoke install built wheel
         run: |
