@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.6.2
+
+Restore reliable S3-compatible integration coverage and tighten configuration and release
+validation without changing valid probe behavior.
+
+### Highlights
+
+- Replace the discontinued MinIO CI image with a pinned Moto server process for S3-compatible
+  storage integration tests.
+- Reject a custom readiness check configured through both the legacy `CUSTOM_CHECKS` setting and
+  `READY_CUSTOM_CHECKS` before it can fail at runtime with a duplicate result name.
+- Give invalid header-name and `PROTECT_HEALTHZ` options distinct Django system-check identifiers.
+- Refuse to publish a GitHub release when its tag does not match the package version.
+
+### Upgrade notes
+
+- Endpoint URLs, payloads, settings, management-command behavior, and supported runtimes are
+  unchanged.
+- Remove duplicate readiness check paths from `CUSTOM_CHECKS` or `READY_CUSTOM_CHECKS`; this
+  configuration already failed at runtime and is now rejected by `python manage.py check`.
+
 ## v0.6.1
 
 Refresh dependencies and deployment documentation while preserving the existing public API.

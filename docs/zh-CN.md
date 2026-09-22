@@ -79,8 +79,8 @@ uv build
 
 生成文件：
 
-- `dist/django_deploy_probes-0.6.1.tar.gz`
-- `dist/django_deploy_probes-0.6.1-py3-none-any.whl`
+- `dist/django_deploy_probes-0.6.2.tar.gz`
+- `dist/django_deploy_probes-0.6.2-py3-none-any.whl`
 
 ### 安装测试
 
@@ -89,7 +89,7 @@ uv build
 ```bash
 python -m venv /tmp/django-deploy-probes-install-test
 source /tmp/django-deploy-probes-install-test/bin/activate
-pip install dist/django_deploy_probes-0.6.1-py3-none-any.whl
+pip install dist/django_deploy_probes-0.6.2-py3-none-any.whl
 python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 ```
 
