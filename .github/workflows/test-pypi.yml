@@ -26,7 +26,10 @@ jobs:
       - name: Build
         run: uv build
 
-      - name: Smoke install built wheel
+      - name: Validate distribution metadata
+        run: uvx --python 3.12 --from 'twine>=6.2' twine check dist/*
+
+      - name: Smoke install built distributions
         run: |
           PACKAGE_VERSION=$(python - <<'PY'
           from pathlib import Path
@@ -39,10 +42,26 @@ jobs:
           print(match.group(1))
           PY
           )
-          python -m venv .venv-smoke
-          . .venv-smoke/bin/activate
-          pip install dist/*.whl
-          python -c "import django_deploy_probes; assert django_deploy_probes.__version__ == '$PACKAGE_VERSION'"
+          DIST_DIR="$PWD/dist"
+
+          python -m venv "$RUNNER_TEMP/wheel-smoke"
+          . "$RUNNER_TEMP/wheel-smoke/bin/activate"
+          python -m pip install "$DIST_DIR"/*.whl
+          python -m pip check
+          (
+            cd "$RUNNER_TEMP"
+            python -c "import django_deploy_probes; assert django_deploy_probes.__version__ == '$PACKAGE_VERSION'"
+          )
+          deactivate
+
+          python -m venv "$RUNNER_TEMP/sdist-smoke"
+          . "$RUNNER_TEMP/sdist-smoke/bin/activate"
+          python -m pip install "$DIST_DIR"/*.tar.gz
+          python -m pip check
+          (
+            cd "$RUNNER_TEMP"
+            python -c "import django_deploy_probes; assert django_deploy_probes.__version__ == '$PACKAGE_VERSION'"
+          )
 
       - name: Publish to TestPyPI
         run: uv publish --publish-url https://test.pypi.org/legacy/ --token "$TEST_PYPI_API_TOKEN"

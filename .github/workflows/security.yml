@@ -24,8 +24,15 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
-        run: uv sync --all-extras --dev
-
-      - name: Audit dependencies
-        run: uvx pip-audit
+      - name: Audit locked project dependencies
+        run: |
+          set -o pipefail
+          uv export \
+            --python 3.12 \
+            --locked \
+            --all-extras \
+            --all-groups \
+            --no-emit-project \
+            --no-hashes | \
+            uvx --python 3.12 --from 'pip-audit>=2.9,<3.0' \
+              pip-audit --requirement /dev/stdin --no-deps

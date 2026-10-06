@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.6.3
+
+Harden release validation so dependency auditing and distribution smoke tests verify the artifacts
+and dependency set that are actually being published.
+
+### Highlights
+
+- Audit the locked project dependency set instead of the isolated `pip-audit` tool environment.
+- Refresh vulnerable locked transitive dependencies for `urllib3` and `virtualenv`.
+- Run lint, formatting, tests with coverage, and strict documentation builds again immediately
+  before publishing to PyPI.
+- Smoke-install both wheel and source distributions outside the repository checkout and verify
+  their installed dependency consistency.
+- Validate TestPyPI distributions with Twine and the same wheel and source smoke-install checks.
+- Extend release hygiene tests to keep the support and security policies aligned with the current
+  release line.
+
+### Upgrade notes
+
+- Endpoint URLs, payloads, settings, management-command behavior, runtime dependency requirements,
+  and supported runtimes are unchanged.
+
 ## v0.6.2
 
 Restore reliable S3-compatible integration coverage and tighten configuration and release
