@@ -1,5 +1,6 @@
 from importlib.util import find_spec
 from ipaddress import ip_network
+from math import isfinite
 
 from django.conf import settings
 from django.core.checks import Error, Warning, register
@@ -64,6 +65,7 @@ def check_deploy_probes_settings(app_configs, **kwargs):
     messages.extend(_check_client_ip_header(merged))
     messages.extend(_check_header_token(merged))
     messages.extend(_check_database_config(merged))
+    messages.extend(_check_cache_config(merged))
     messages.extend(_check_migration_config(merged))
     messages.extend(_check_redis_config(merged))
     messages.extend(_check_celery_config(merged))
@@ -200,7 +202,8 @@ def _check_ready_custom_check_overlap(probes_settings):
 
 
 def _check_detail_level(probes_settings):
-    if probes_settings.get("DETAIL_LEVEL") in VALID_DETAIL_LEVELS:
+    value = probes_settings.get("DETAIL_LEVEL")
+    if isinstance(value, str) and value in VALID_DETAIL_LEVELS:
         return []
     return [
         Error(
@@ -431,10 +434,14 @@ def _check_redis_config(probes_settings):
                 )
             )
             continue
-        if not isinstance(config, dict) or not config.get("LOCATION"):
+        if (
+            not isinstance(config, dict)
+            or not isinstance(config.get("LOCATION"), str)
+            or not config["LOCATION"]
+        ):
             messages.append(
                 Error(
-                    f"DEPLOY_PROBES['REDIS']['{alias}']['LOCATION'] is required.",
+                    f"DEPLOY_PROBES['REDIS']['{alias}']['LOCATION'] must be a non-empty string.",
                     id="django_deploy_probes.E009",
                 )
             )
@@ -493,13 +500,19 @@ def _check_celery_config(probes_settings):
 
 
 def _check_is_enabled(check_name, probes_settings):
-    return check_name in probes_settings.get(
-        "READY_CHECKS", []
-    ) or check_name in probes_settings.get("STARTUP_CHECKS", [])
+    return any(
+        isinstance(probes_settings.get(key), (list, tuple)) and check_name in probes_settings[key]
+        for key in ("READY_CHECKS", "STARTUP_CHECKS")
+    )
 
 
 def _is_positive_number(value):
-    return isinstance(value, (int, float)) and not isinstance(value, bool) and value > 0
+    return (
+        isinstance(value, (int, float))
+        and not isinstance(value, bool)
+        and value > 0
+        and (not isinstance(value, float) or isfinite(value))
+    )
 
 
 def _check_require_checks(probes_settings):
@@ -546,9 +559,7 @@ def _check_openapi_dependencies(probes_settings):
 
 
 def _check_storage_config(probes_settings):
-    if "storage" not in probes_settings.get(
-        "READY_CHECKS", []
-    ) and "storage" not in probes_settings.get("STARTUP_CHECKS", []):
+    if not _check_is_enabled("storage", probes_settings):
         return []
 
     storage_settings = probes_settings.get("STORAGE")
@@ -587,7 +598,7 @@ def _check_storage_config(probes_settings):
             continue
 
         check_mode = config.get("CHECK", "exists")
-        if check_mode not in VALID_STORAGE_CHECKS:
+        if not isinstance(check_mode, str) or check_mode not in VALID_STORAGE_CHECKS:
             messages.append(
                 Error(
                     f"DEPLOY_PROBES['STORAGE']['{alias}']['CHECK'] must be one of: "
@@ -597,10 +608,12 @@ def _check_storage_config(probes_settings):
             )
             continue
 
-        if check_mode == "exists" and not config.get("PATH"):
+        if check_mode == "exists" and (
+            not isinstance(config.get("PATH"), str) or not config["PATH"]
+        ):
             messages.append(
                 Error(
-                    f"DEPLOY_PROBES['STORAGE']['{alias}']['PATH'] is required for exists checks.",
+                    f"DEPLOY_PROBES['STORAGE']['{alias}']['PATH'] must be a non-empty string for exists checks.",
                     id="django_deploy_probes.E016",
                 )
             )
@@ -621,4 +634,44 @@ def _check_storage_config(probes_settings):
                 )
             )
 
+    return messages
+
+
+def _check_cache_config(probes_settings):
+    if not _check_is_enabled("cache", probes_settings):
+        return []
+    aliases = probes_settings.get("CACHES")
+    if not isinstance(aliases, (list, tuple)) or not aliases:
+        return [
+            Error(
+                "DEPLOY_PROBES['CACHES'] must define at least one cache alias when cache is enabled.",
+                id="django_deploy_probes.E042",
+            )
+        ]
+    messages = []
+    seen = set()
+    for alias in aliases:
+        if not isinstance(alias, str) or not alias:
+            messages.append(
+                Error(
+                    "DEPLOY_PROBES['CACHES'] entries must be non-empty strings.",
+                    id="django_deploy_probes.E042",
+                )
+            )
+            continue
+        if alias in seen:
+            messages.append(
+                Error(
+                    f"Duplicate DEPLOY_PROBES['CACHES'] alias: {alias}.",
+                    id="django_deploy_probes.E042",
+                )
+            )
+        elif alias not in settings.CACHES:
+            messages.append(
+                Error(
+                    f"Unknown DEPLOY_PROBES['CACHES'] alias: {alias}.",
+                    id="django_deploy_probes.E043",
+                )
+            )
+        seen.add(alias)
     return messages

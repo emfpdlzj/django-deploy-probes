@@ -35,6 +35,9 @@ pip install "django-deploy-probes[openapi]"
 pip install "django-deploy-probes[all]"
 ```
 
+Cache checks validate Django `CACHES` aliases with a write/read/delete round trip.
+See [cache checks](api.md#cache-checks) for configuration and backend timeout guidance.
+
 Storage checks do not require a package extra. They reuse Django storage aliases, so projects already using S3 through `django-storages` can probe those backends directly.
 
 ## Quick Start

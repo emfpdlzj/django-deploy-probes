@@ -23,6 +23,10 @@ pip install "django-deploy-probes[openapi]"
 pip install "django-deploy-probes[all]"
 ```
 
+`cache` 점검은 Django `CACHES` alias에 고유 키를 쓰고 읽고 삭제합니다.
+`DEPLOY_PROBES = {"READY_CHECKS": ["cache"], "CACHES": ["default"]}`로 활성화하며,
+네트워크 타임아웃은 캐시 백엔드에 설정합니다. [캐시 점검](api.md#cache-checks)을 참고하세요.
+
 ## 빠른 시작
 
 ### Include 방식 URL 설정
@@ -81,8 +85,8 @@ uv build
 
 생성 파일:
 
-- `dist/django_deploy_probes-0.6.3.tar.gz`
-- `dist/django_deploy_probes-0.6.3-py3-none-any.whl`
+- `dist/django_deploy_probes-0.7.0.tar.gz`
+- `dist/django_deploy_probes-0.7.0-py3-none-any.whl`
 
 ### 설치 테스트
 
@@ -91,7 +95,7 @@ uv build
 ```bash
 python -m venv /tmp/django-deploy-probes-install-test
 source /tmp/django-deploy-probes-install-test/bin/activate
-pip install dist/django_deploy_probes-0.6.3-py3-none-any.whl
+pip install dist/django_deploy_probes-0.7.0-py3-none-any.whl
 python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 ```
 

@@ -1,3 +1,4 @@
+from django_deploy_probes.checks.cache import check_caches
 from django_deploy_probes.checks.celery import check_celery
 from django_deploy_probes.checks.custom import check_custom_checks
 from django_deploy_probes.checks.database import check_databases
@@ -7,6 +8,14 @@ from django_deploy_probes.checks.results import failure_result, run_check
 from django_deploy_probes.checks.storage import check_storage
 
 BUILTIN_CHECKS = {
+    "cache": lambda probes_settings: (
+        check_caches,
+        (probes_settings["CACHES"],),
+        {
+            "detail_level": probes_settings["DETAIL_LEVEL"],
+            "include_duration": probes_settings["INCLUDE_CHECK_DURATIONS"],
+        },
+    ),
     "database": lambda probes_settings: (
         check_databases,
         (probes_settings["DATABASES"],),

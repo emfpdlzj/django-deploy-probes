@@ -14,7 +14,7 @@ traffic, an external monitor inspecting dependencies, or a startup script waitin
 | Dedicated startup endpoint | `/startupz` | Not a separate contract | Not a separate contract | Not a separate contract | Management command |
 | Deployment metadata | `/version` with optional build fields | Not a built-in deployment contract | Not a built-in deployment contract | Not a built-in deployment contract | No |
 | CLI execution | Same payload contract as HTTP | `health_check` command | Management command | `healthcheck` command | Core workflow |
-| Built-in focus | Database, migrations, Redis, Celery, storage | Broad plugin catalog including cache and system resources | Database, cache, email, storage, custom checks | Database, cache, static files, migrations | Service availability before startup |
+| Built-in focus | Database, cache, migrations, Redis, Celery, storage | Broad plugin catalog including cache and system resources | Database, cache, email, storage, custom checks | Database, cache, static files, migrations | Service availability before startup |
 | Access controls | Internal CIDRs, trusted proxies, header token | Deployment-specific | Token authentication | Deployment-specific | Not applicable |
 
 The table describes built-in behavior, not everything that can be implemented with custom checks.

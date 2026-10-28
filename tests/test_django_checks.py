@@ -419,3 +419,56 @@ class DjangoChecksTestCase(SimpleTestCase):
             messages = run_checks()
 
         self.assertIn("django_deploy_probes.E035", {message.id for message in messages})
+
+
+class InvalidConfigurationRegressionTestCase(SimpleTestCase):
+    def test_malformed_values_produce_errors_without_crashing(self):
+        cases = [
+            ({"READY_CHECKS": None}, "E002"),
+            ({"STARTUP_CHECKS": 123}, "E002"),
+            ({"DETAIL_LEVEL": []}, "E004"),
+            ({"READY_CHECKS": ["storage"], "STORAGE": {"default": {"CHECK": []}}}, "E015"),
+            ({"READY_CHECKS": ["storage"], "STORAGE": {"default": {"PATH": 123}}}, "E016"),
+            ({"READY_CHECKS": ["redis"], "REDIS": {"default": {"LOCATION": 123}}}, "E009"),
+        ]
+        for configured, error_id in cases:
+            with self.subTest(configured=configured), override_settings(DEPLOY_PROBES=configured):
+                self.assertIn(f"django_deploy_probes.{error_id}", {m.id for m in run_checks()})
+
+    def test_nonfinite_timeouts_are_rejected(self):
+        for timeout in (float("inf"), float("-inf"), float("nan")):
+            for configured, error_id in (
+                (
+                    {
+                        "READY_CHECKS": ["redis"],
+                        "REDIS": {"default": {"LOCATION": "redis://localhost", "TIMEOUT": timeout}},
+                    },
+                    "E020",
+                ),
+                (
+                    {"READY_CHECKS": ["celery"], "CELERY": {"BROKER": True, "TIMEOUT": timeout}},
+                    "E022",
+                ),
+            ):
+                with (
+                    self.subTest(configured=configured),
+                    override_settings(DEPLOY_PROBES=configured),
+                ):
+                    self.assertIn(f"django_deploy_probes.{error_id}", {m.id for m in run_checks()})
+
+    def test_cache_alias_configuration(self):
+        for aliases, error_id in (
+            (None, "E042"),
+            ([], "E042"),
+            ([[]], "E042"),
+            ([""], "E042"),
+            (["default", "default"], "E042"),
+            (["missing"], "E043"),
+        ):
+            with (
+                self.subTest(aliases=aliases),
+                override_settings(DEPLOY_PROBES={"STARTUP_CHECKS": ["cache"], "CACHES": aliases}),
+            ):
+                self.assertIn(f"django_deploy_probes.{error_id}", {m.id for m in run_checks()})
+        with override_settings(DEPLOY_PROBES={"READY_CHECKS": ["cache"]}):
+            self.assertEqual(run_checks(), [])

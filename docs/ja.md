@@ -23,6 +23,10 @@ pip install "django-deploy-probes[openapi]"
 pip install "django-deploy-probes[all]"
 ```
 
+`cache` チェックは Django の `CACHES` エイリアスで一意のキーを書き込み、読み取り、削除します。
+`DEPLOY_PROBES = {"READY_CHECKS": ["cache"], "CACHES": ["default"]}` で有効にします。
+ネットワークタイムアウトはキャッシュバックエンドで設定してください。[キャッシュチェック](api.md#cache-checks)を参照してください。
+
 ## クイックスタート
 
 ### Include 方式の URL 設定
@@ -81,8 +85,8 @@ uv build
 
 生成されるファイル:
 
-- `dist/django_deploy_probes-0.6.3.tar.gz`
-- `dist/django_deploy_probes-0.6.3-py3-none-any.whl`
+- `dist/django_deploy_probes-0.7.0.tar.gz`
+- `dist/django_deploy_probes-0.7.0-py3-none-any.whl`
 
 ### インストールテスト
 
@@ -91,7 +95,7 @@ uv build
 ```bash
 python -m venv /tmp/django-deploy-probes-install-test
 source /tmp/django-deploy-probes-install-test/bin/activate
-pip install dist/django_deploy_probes-0.6.3-py3-none-any.whl
+pip install dist/django_deploy_probes-0.7.0-py3-none-any.whl
 python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 ```
 

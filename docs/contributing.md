@@ -69,3 +69,11 @@ Use the repository's [bug report](https://github.com/emfpdlzj/django-deploy-prob
 and include the Python, Django, and package versions; sanitized `DEPLOY_PROBES` settings; the probe
 status and payload; and the relevant backend. Never include credentials, tokens, connection URLs,
 or sensitive custom-check messages.
+
+Pre-commit tooling requires Python 3.11 or later because maintained file-locking
+dependencies no longer support Python 3.10. The package and its test suite still
+support Python 3.10. When developing on Python 3.10, run hooks with:
+
+```bash
+uvx --python 3.11 pre-commit run --all-files
+```

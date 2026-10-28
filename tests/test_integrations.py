@@ -3,7 +3,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import mock, skipUnless
 
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 
@@ -114,6 +114,39 @@ class RedisIntegrationTestCase(TestCase):
                 "celery.result_backend": "ok",
             },
         )
+
+
+@skipUnless(os.environ.get("DEPLOY_PROBES_REDIS_URL"), "Redis integration settings are not set")
+class RedisCacheIntegrationTestCase(SimpleTestCase):
+    def test_django_redis_cache_round_trip_cleans_up_probe_keys(self):
+        from django.core.cache import caches
+
+        with override_settings(
+            CACHES={
+                "default": {
+                    "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                    "LOCATION": os.environ["DEPLOY_PROBES_REDIS_URL"],
+                    "KEY_PREFIX": "deploy-probes-integration",
+                    "OPTIONS": {"socket_connect_timeout": 1, "socket_timeout": 1},
+                }
+            },
+            DEPLOY_PROBES={"READY_CHECKS": ["cache"], "STARTUP_CHECKS": ["cache"]},
+        ):
+            import redis
+
+            client = redis.Redis.from_url(os.environ["DEPLOY_PROBES_REDIS_URL"])
+            try:
+                caches["default"].set("application-key", "keep", timeout=30)
+                before = set(client.scan_iter(match="deploy-probes-integration:*"))
+                for endpoint in ("readyz", "startupz"):
+                    response = self.client.get(reverse(f"django_deploy_probes:{endpoint}"))
+                    self.assertEqual(response.status_code, 200)
+                    self.assertEqual(response.json()["checks"], {"cache.default": "ok"})
+                self.assertEqual(set(client.scan_iter(match="deploy-probes-integration:*")), before)
+                self.assertEqual(caches["default"].get("application-key"), "keep")
+            finally:
+                caches["default"].delete("application-key")
+                client.close()
 
 
 @skipUnless(os.environ.get("DEPLOY_PROBES_S3_ENDPOINT"), "S3 integration settings are not set")

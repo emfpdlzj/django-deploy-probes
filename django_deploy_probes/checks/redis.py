@@ -1,3 +1,5 @@
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 from django_deploy_probes.checks.results import (
     failure_result,
     failure_result_for_exception,
@@ -8,8 +10,16 @@ from django_deploy_probes.checks.results import (
 def _get_redis_client(location, timeout):
     import redis
 
+    url = urlsplit(location)
+    query = urlencode(
+        [
+            (key, value)
+            for key, value in parse_qsl(url.query, keep_blank_values=True)
+            if key not in {"socket_connect_timeout", "socket_timeout"}
+        ]
+    )
     return redis.Redis.from_url(
-        location,
+        urlunsplit(url._replace(query=query)),
         socket_connect_timeout=timeout,
         socket_timeout=timeout,
     )
