@@ -23,6 +23,10 @@ pip install "django-deploy-probes[openapi]"
 pip install "django-deploy-probes[all]"
 ```
 
+`cache` 检查通过 Django `CACHES` 别名写入、读取并删除唯一键。
+使用 `DEPLOY_PROBES = {"READY_CHECKS": ["cache"], "CACHES": ["default"]}` 启用，
+网络超时需在缓存后端配置。参见[缓存检查](api.md#cache-checks)。
+
 ## 快速开始
 
 ### Include 风格的 URL 配置
@@ -79,8 +83,8 @@ uv build
 
 生成文件：
 
-- `dist/django_deploy_probes-0.6.3.tar.gz`
-- `dist/django_deploy_probes-0.6.3-py3-none-any.whl`
+- `dist/django_deploy_probes-0.7.0.tar.gz`
+- `dist/django_deploy_probes-0.7.0-py3-none-any.whl`
 
 ### 安装测试
 
@@ -89,7 +93,7 @@ uv build
 ```bash
 python -m venv /tmp/django-deploy-probes-install-test
 source /tmp/django-deploy-probes-install-test/bin/activate
-pip install dist/django_deploy_probes-0.6.3-py3-none-any.whl
+pip install dist/django_deploy_probes-0.7.0-py3-none-any.whl
 python -c "import django_deploy_probes; print(django_deploy_probes.__version__)"
 ```
 

@@ -1,5 +1,29 @@
 # Changelog
 
+## v0.7.0
+
+Add Django cache alias probes and harden compatibility testing, authentication,
+timeout enforcement, and configuration diagnostics.
+
+### Highlights
+
+- Add the `cache` readiness and startup check with configurable `CACHES` aliases,
+  unique temporary keys, write/read/delete verification, and a 30-second cleanup TTL.
+- Preserve the selected Django version throughout CI and assert the actual tested version.
+- Compare header tokens as UTF-8 bytes so incorrect non-ASCII tokens return 403.
+- Make Redis probe `TIMEOUT` override socket timeout parameters in connection URLs.
+- Report malformed check lists, detail levels, storage modes and paths without crashing
+  Django system checks. Validate Redis location types and reject nonfinite timeouts.
+
+### Upgrade notes
+
+- Cache probes are opt-in: add `cache` to `READY_CHECKS` or `STARTUP_CHECKS` and set
+  `CACHES` to Django cache aliases (default: `["default"]`). Configure network timeouts
+  in the cache backend.
+- Redis URL socket timeout parameters no longer override `REDIS[alias]["TIMEOUT"]`.
+- Fix malformed settings reported by Django system checks before deployment.
+- Existing endpoint URLs and default payloads remain unchanged.
+
 ## v0.6.3
 
 Harden release validation so dependency auditing and distribution smoke tests verify the artifacts
