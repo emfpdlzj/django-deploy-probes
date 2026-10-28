@@ -12,6 +12,7 @@ timeout enforcement, and configuration diagnostics.
 - Preserve the selected Django version throughout CI and assert the actual tested version.
 - Compare header tokens as UTF-8 bytes so incorrect non-ASCII tokens return 403.
 - Make Redis probe `TIMEOUT` override socket timeout parameters in connection URLs.
+- Refresh vulnerable locked development and OpenAPI dependencies.
 - Report malformed check lists, detail levels, storage modes and paths without crashing
   Django system checks. Validate Redis location types and reject nonfinite timeouts.
 
@@ -22,6 +23,9 @@ timeout enforcement, and configuration diagnostics.
   in the cache backend.
 - Redis URL socket timeout parameters no longer override `REDIS[alias]["TIMEOUT"]`.
 - Fix malformed settings reported by Django system checks before deployment.
+- Pre-commit tooling now requires Python 3.11 or later; package runtime and test support
+  for Python 3.10 is unchanged. Python 3.10 contributors can run hooks with
+  `uvx --python 3.11 pre-commit run --all-files`.
 - Existing endpoint URLs and default payloads remain unchanged.
 
 ## v0.6.3

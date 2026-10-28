@@ -32,3 +32,11 @@ uv build
 4. Smoke-install the built wheel in a clean virtualenv.
 5. Merge the version bump PR into `main`. This creates a draft GitHub release and tag automatically.
 6. Review and publish the draft GitHub release. The publish workflow uses PyPI Trusted Publishing.
+
+Pre-commit tooling requires Python 3.11 or later because maintained file-locking
+dependencies no longer support Python 3.10. The package and its test suite still
+support Python 3.10. When developing on Python 3.10, run hooks with:
+
+```bash
+uvx --python 3.11 pre-commit run --all-files
+```
