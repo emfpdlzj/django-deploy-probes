@@ -55,18 +55,32 @@ jobs:
           uv sync --all-extras --dev
           uv pip install "django==${{ matrix.django-version }}"
 
+      - name: Verify Django matrix version
+        env:
+          EXPECTED_DJANGO: ${{ matrix.django-version }}
+        run: |
+          uv run --no-sync python - <<'PY'
+          import os
+          import django
+
+          actual = django.get_version()
+          expected = os.environ["EXPECTED_DJANGO"].removesuffix(".*")
+          print(f"Testing Django {actual}")
+          assert actual.startswith(expected + "."), (actual, expected)
+          PY
+
       - name: Lint
-        run: uv run ruff check .
+        run: uv run --no-sync ruff check .
 
       - name: Format
-        run: uv run ruff format --check .
+        run: uv run --no-sync ruff format --check .
 
       - name: Test
-        run: uv run python -Wd -m pytest -q --cov --cov-report=term-missing --cov-report=xml
+        run: uv run --no-sync python -Wd -m pytest -q --cov --cov-report=term-missing --cov-report=xml
 
       - name: Build docs
         if: matrix.python-version == '3.13' && matrix.django-version == '6.1.*'
-        run: uv run mkdocs build --strict
+        run: uv run --no-sync mkdocs build --strict
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.13' && matrix.django-version == '6.1.*' && env.CODECOV_TOKEN != ''
@@ -145,7 +159,7 @@ jobs:
           trap 'kill "$MOTO_PID" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
             if curl --fail --silent http://localhost:9000/ >/dev/null; then
-              uv run pytest -q tests/test_integrations.py
+              uv run --no-sync pytest -q tests/test_integrations.py
               exit $?
             fi
             sleep 1

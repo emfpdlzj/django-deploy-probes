@@ -24,7 +24,7 @@ python manage.py check
 ```
 
 The system check rejects unknown or duplicate checks, invalid aliases and types, incomplete Redis,
-Celery, migration, storage, proxy, token, and OpenAPI settings, and configurations that would run a
+Celery, cache, migration, storage, proxy, token, and OpenAPI settings, and configurations that would run a
 Celery check without checking any Celery operation.
 
 Run the in-process probes in the same image that will be deployed:
@@ -52,7 +52,7 @@ Checks execute sequentially. Set each dependency's native timeout first, then se
 timeout above the worst-case sum:
 
 ```text
-platform timeout > database + Redis + Celery + storage + custom checks + network margin
+platform timeout > database + cache + Redis + Celery + storage + custom checks + network margin
 ```
 
 Example for a readiness probe with a 1-second Redis timeout, a 1-second Celery broker timeout,
@@ -82,7 +82,7 @@ DATABASES = {
 }
 ```
 
-Configure connect/read limits in the storage backend and result backend transport. Returning from
+Configure connect/read limits in the cache backend, storage backend, and result backend transport. Returning from
 an HTTP request cannot safely cancel arbitrary synchronous backend or custom-check work.
 
 ## Dependency Selection
@@ -143,7 +143,7 @@ Record the expected status code, maximum response time, and rollback action for 
 
 ## Verified Backends
 
-The project CI runs the probe code against PostgreSQL, Redis, a Redis-backed Celery broker and
+The project CI runs the probe code against PostgreSQL, Redis, Django RedisCache, a Redis-backed Celery broker and
 result backend, filesystem storage, and Moto as an S3-compatible Django storage backend. Unit tests
 cover failure normalization, proxy handling, response contracts, and configuration errors across
 the supported Python and Django matrix.

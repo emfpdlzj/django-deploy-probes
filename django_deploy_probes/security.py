@@ -51,7 +51,9 @@ def security_forbidden_response(request, probes_settings, protect_healthz=False)
             header_name = header_token_validation.get("HEADER_NAME", "X-Probe-Token")
             token = header_token_validation.get("TOKEN")
             request_token = request.headers.get(header_name, "")
-            if not token or not secrets.compare_digest(request_token, str(token)):
+            if not token or not secrets.compare_digest(
+                request_token.encode("utf-8"), str(token).encode("utf-8")
+            ):
                 return HttpResponseForbidden()
 
     return None

@@ -86,6 +86,7 @@ DEPLOY_PROBES = {
     "READY_CHECKS": [],
     "STARTUP_CHECKS": [],
     "DATABASES": ["default"],
+    "CACHES": ["default"],
     "STORAGE": {},
     "REDIS": {},
     "CELERY": {
@@ -174,10 +175,12 @@ client or backend that can cancel the underlying I/O.
 | Celery workers | `CELERY["TIMEOUT"]` is passed to `control.ping()`. |
 | Celery result backend | Configure the timeout in the Celery result backend transport. |
 | Database and migrations | Configure driver connection and statement timeouts in Django `DATABASES`. |
+| Cache | Configure connection/read timeouts in Django `CACHES` backend options. |
 | Storage | Configure connect/read timeouts on the Django storage backend. |
 | Custom checks | Configure the called client and propagate its timeout exception. |
 
-Redis and Celery timeout settings must be positive numbers. For operations configured
+Redis and Celery timeout settings must be finite positive numbers. Redis `TIMEOUT`
+takes precedence over `socket_timeout` and `socket_connect_timeout` URL query options. For operations configured
 outside this package, built-in `TimeoutError` and common backend exceptions such as
 `ReadTimeoutError` and `ConnectTimeoutError` are recognized. With
 `DETAIL_LEVEL="safe"`, they produce:
@@ -196,6 +199,33 @@ Checks currently run sequentially. Size Kubernetes `timeoutSeconds`, load balanc
 timeouts, and CLI job timeouts above the worst-case sum of all configured dependency
 timeouts. Internal parallel execution and result caching are intentionally not part of
 this contract.
+
+## Cache Checks
+
+Enable `cache` in `READY_CHECKS` or `STARTUP_CHECKS` and select Django cache aliases:
+
+```python
+DEPLOY_PROBES = {
+    "READY_CHECKS": ["cache"],
+    "CACHES": ["default", "sessions"],
+}
+```
+
+`CACHES` defaults to `["default"]` and refers to aliases in Django's `CACHES` setting.
+No extra package is needed beyond the dependencies required by your cache backend.
+Each `cache.<alias>` result checks a write/read/delete round trip using a unique key.
+The key has a 30-second TTL and cleanup is attempted even if writing or reading fails.
+Existing application keys are left untouched. No cache operation runs from `/healthz`.
+
+With `DETAIL_LEVEL="safe"`, failures report `value_mismatch`, `delete_failed`,
+`cache_check_failed`, or `timeout` without exposing backend exceptions.
+Durations and CLI exit codes follow the existing probe contract.
+
+Configure network timeouts in the cache backend; the 30-second TTL only bounds how
+long a temporary key can remain. Local memory caches test only the current process,
+and dummy caches fail the read-back check. A successful local cache probe does not
+establish that a shared cache server is reachable. Every request performs real cache
+operations, so choose probe intervals appropriate for your backend.
 
 ## Storage Checks
 

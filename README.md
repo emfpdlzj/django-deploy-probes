@@ -94,11 +94,12 @@ DEPLOY_PROBES = {
     "SERVICE_NAME": "my-django-app",
     "ENVIRONMENT": "prod",
     "VERSION": "1.2.0",
-    "READY_CHECKS": ["database", "redis", "celery", "storage"],
+    "READY_CHECKS": ["database", "cache", "redis", "celery", "storage"],
     "STARTUP_CHECKS": ["migrations"],
     "READY_CUSTOM_CHECKS": [],
     "STARTUP_CUSTOM_CHECKS": [],
     "DATABASES": ["default"],
+    "CACHES": ["default"],
     "STORAGE": {
         "default": {
             "CHECK": "exists",
@@ -146,6 +147,10 @@ DEPLOY_PROBES = {
 
 For S3, `exists` is safer when you already manage a sentinel object like `probes/ready.txt`. Use `write` when you want to validate bucket write/delete permissions during readiness checks.
 
+The `cache` check validates Django `CACHES` aliases with a unique temporary key and a
+write/read/delete round trip. Configure cache network timeouts in the backend options.
+See [cache checks](docs/api.md#cache-checks) for behavior and safe failure reasons.
+
 ### Timeout contract
 
 There is no global probe timeout. Redis and Celery apply their `TIMEOUT` values only
@@ -154,7 +159,9 @@ to operations whose client APIs support a real timeout:
 - `REDIS[alias]["TIMEOUT"]`: Redis connect and socket timeout.
 - `CELERY["TIMEOUT"]`: Celery broker connection and worker ping timeout.
 
-Database, migration, storage, Celery result backend, and custom checks use their
+Redis `TIMEOUT` takes precedence over timeout options in the Redis URL.
+
+Database, migration, cache, storage, Celery result backend, and custom checks use their
 backend-native timeout configuration. Checks run sequentially, so set Kubernetes
 `timeoutSeconds` or an upstream load balancer timeout above the worst-case sum of the
 enabled checks.

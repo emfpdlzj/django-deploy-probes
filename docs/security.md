@@ -177,6 +177,10 @@ Rules:
 - If your proxy uses a single-value header such as `X-Real-IP`, set `CLIENT_IP_HEADER` to that
   header name instead.
 
+Token comparison uses UTF-8 bytes with a constant-time comparison. Incorrect tokens,
+including non-ASCII header values, return HTTP 403. ASCII tokens are recommended for
+interoperability across HTTP clients and proxies.
+
 ## Next Step
 
 Use the token in CI/CD deployment validation:
